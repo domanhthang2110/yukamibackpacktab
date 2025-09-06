@@ -2,6 +2,8 @@ package com.yukami.backpacktab.client.tabs;
 
 import com.yukami.backpacktab.client.util.CarriedItemUtil;
 
+import static com.yukami.backpacktab.YukamiBackpackTab.LOGGER;
+
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -50,7 +52,7 @@ public class BackpackTab implements InventoryTab {
                 return false; // Continue searching
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Error opening backpack: {}", e.getMessage());
         }
     }
     

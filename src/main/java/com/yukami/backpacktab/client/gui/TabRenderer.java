@@ -5,6 +5,8 @@ import com.yukami.backpacktab.client.tabs.BackpackTab;
 import com.yukami.backpacktab.client.tabs.InventoryTab;
 import com.yukami.backpacktab.client.util.TabPositionCalculator;
 
+import static com.yukami.backpacktab.YukamiBackpackTab.LOGGER;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -175,8 +177,7 @@ public class TabRenderer {
             
             return foundTab[0];
         } catch (Exception e) {
-            System.err.println("Error getting equipped backpack tab: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error getting equipped backpack tab: {}", e.getMessage());
         }
         return null;
     }

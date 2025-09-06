@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 @Mod(YukamiBackpackTab.MODID)
 public class YukamiBackpackTab {
     public static final String MODID = "yukamibackpacktab";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public YukamiBackpackTab(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();

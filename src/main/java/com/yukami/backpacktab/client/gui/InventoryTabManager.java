@@ -78,14 +78,6 @@ public class InventoryTabManager {
     }
 
     /**
-     * Determines if the given screen is an instance of IBackpackScreen.
-     */
-    private static boolean isBackpackScreen(AbstractContainerScreen<?> screen) {
-        return screen instanceof IBackpackScreen;
-    }
-
-
-    /**
      * Updates the current screen state and clears previous context if not tab switching.
      */
     private static void updateScreenState(AbstractContainerScreen<?> screen) {
