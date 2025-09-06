@@ -23,6 +23,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.IBackpackScreen;
 public class ContainerTab implements InventoryTab {
     
     private final BlockPos containerPos;
+    private boolean active = false;
         
     public ContainerTab(BlockPos containerPos) {
         this.containerPos = containerPos;
@@ -34,7 +35,25 @@ public class ContainerTab implements InventoryTab {
             Level world = Minecraft.getInstance().level;
             if (world != null) {
                 BlockState blockState = world.getBlockState(containerPos);
-                return new ItemStack(blockState.getBlock());
+                
+                // Special handling for BackpackBlock - get the actual backpack item from block entity
+                if (blockState.getBlock() instanceof net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock) {
+                    try {
+                        var blockEntity = world.getBlockEntity(containerPos);
+                        if (blockEntity instanceof net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity backpackBE) {
+                            ItemStack backpackStack = backpackBE.getBackpackWrapper().getBackpack();
+                            if (!backpackStack.isEmpty()) {
+                                return backpackStack;
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("[BackpackTab] Error getting backpack from block entity: " + e.getMessage());
+                    }
+                }
+                
+                // Fallback to block item
+                ItemStack icon = new ItemStack(blockState.getBlock());
+                return icon;
             }
         }
         return ItemStack.EMPTY;
@@ -86,7 +105,31 @@ public class ContainerTab implements InventoryTab {
     
     @Override
     public boolean matchesCurrentScreen(AbstractContainerScreen<?> screen) {
-        // A ContainerTab matches if a block GUI is open and the current screen is not a backpack screen
-        return containerPos != null && !(screen instanceof IBackpackScreen);
+        if (containerPos == null) {
+            return false;
+        }
+        
+        // Check if this is a backpack block
+        Level world = Minecraft.getInstance().level;
+        if (world != null) {
+            BlockState blockState = world.getBlockState(containerPos);
+            if (blockState.getBlock() instanceof net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock) {
+                // For backpack blocks, match if the screen is a backpack screen
+                return screen instanceof IBackpackScreen;
+            }
+        }
+        
+        // For regular container blocks, match if it's not a backpack screen
+        return !(screen instanceof IBackpackScreen);
+    }
+    
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+    
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

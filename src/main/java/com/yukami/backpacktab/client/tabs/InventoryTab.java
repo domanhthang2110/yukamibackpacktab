@@ -36,6 +36,16 @@ public interface InventoryTab {
     boolean matchesCurrentScreen(AbstractContainerScreen<?> screen);
 
     /**
+     * Returns true if this tab is currently active
+     */
+    boolean isActive();
+    
+    /**
+     * Sets the active state of this tab
+     */
+    void setActive(boolean active);
+
+    /**
      * Returns true if this tab represents an "instant" client-side screen (like the player inventory)
      * that doesn't require server interaction to open.
      */

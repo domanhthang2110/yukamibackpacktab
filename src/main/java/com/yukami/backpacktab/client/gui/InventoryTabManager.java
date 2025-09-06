@@ -9,9 +9,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.IBackpackScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +30,14 @@ public class InventoryTabManager {
     private static AbstractContainerScreen<?> currentScreen = null;
     private static BlockPos storedBlockPos = null; // Store block pos when block GUI opens
     private static boolean isTabSwitching = false; // Track if we're in the middle of a tab switch
+    private static boolean isFromBlockClick = false; // Track if the next screen is from a block click
     private static final List<InventoryTab> activeTabs = new ArrayList<>(); // List of tabs to render
 
     /**
-     * Checks if the given block position corresponds to a container block.
+     * Checks if the given block position corresponds to a container block or backpack block.
      * @param world The world instance.
      * @param pos The block position.
-     * @return True if the block is a container, false otherwise.
+     * @return True if the block is a container or backpack block, false otherwise.
      */
     private static boolean isContainerBlock(Level world, BlockPos pos) {
         if (world == null || pos == null) {
@@ -42,10 +45,29 @@ public class InventoryTabManager {
         }
         BlockState blockState = world.getBlockState(pos);
         try {
+            // Check if it's a BackpackBlock (which doesn't implement MenuProvider)
+            if (blockState.getBlock() instanceof BackpackBlock) {
+                return true;
+            }
+            // Check for regular container blocks
             return blockState.getMenuProvider(world, pos) != null;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Checks if the given block position corresponds to a backpack block.
+     * @param world The world instance.
+     * @param pos The block position.
+     * @return True if the block is a backpack block, false otherwise.
+     */
+    private static boolean isBackpackBlock(Level world, BlockPos pos) {
+        if (world == null || pos == null) {
+            return false;
+        }
+        BlockState blockState = world.getBlockState(pos);
+        return blockState.getBlock() instanceof BackpackBlock;
     }
 
     /**
@@ -62,25 +84,6 @@ public class InventoryTabManager {
         return screen instanceof IBackpackScreen;
     }
 
-    /**
-     * Attempts to get the BlockPos of the targeted block if it's a container.
-     * Returns null if no block is targeted, or if the targeted block is not a container.
-     */
-    private static BlockPos getTargetedBlockPos() {
-        var hitResult = Minecraft.getInstance().hitResult;
-        if (!(hitResult instanceof net.minecraft.world.phys.BlockHitResult blockHitResult)) {
-            return null;
-        }
-
-        BlockPos hitBlockPos = blockHitResult.getBlockPos();
-        Level world = Minecraft.getInstance().level;
-
-        if (world != null && isContainerBlock(world, hitBlockPos)) {
-            return hitBlockPos;
-        } else {
-            return null;
-        }
-    }
 
     /**
      * Updates the current screen state and clears previous context if not tab switching.
@@ -88,7 +91,7 @@ public class InventoryTabManager {
     private static void updateScreenState(AbstractContainerScreen<?> screen) {
         currentScreen = screen;
         if (!isTabSwitching) {
-            storedBlockPos = null; // Clear stored block pos if not tab switching
+            // Don't clear storedBlockPos and isFromBlockClick here - we need them for determineBaseTab
             activeTabs.clear(); // Clear previous tabs only if not tab switching
         }
     }
@@ -101,39 +104,87 @@ public class InventoryTabManager {
             return new PlayerTab();
         }
 
-        if (!isBackpackScreen(screen)) {
-            // This covers initial container open and switching to container
-            BlockPos hitBlockPos = getTargetedBlockPos();
-            if (hitBlockPos != null) {
-                storedBlockPos = hitBlockPos;
-                return new ContainerTab(storedBlockPos);
-            } else {
-                return new PlayerTab(); // Fallback if no valid block is targeted
-            }
+        // If we have a stored block position from a right-click event, use it
+        if (isFromBlockClick && storedBlockPos != null) {
+            return new ContainerTab(storedBlockPos);
         }
 
-        // If a backpack is opened directly or switched to, the base tab depends on the previous context
+        // If we have a stored block position from previous context (tab switching), use it
         if (storedBlockPos != null) {
             return new ContainerTab(storedBlockPos);
-        } else {
-            return new PlayerTab(); // Default to player tab as base
         }
+
+        // Default to player tab (for equipped backpacks opened via hotkey/item use)
+        return new PlayerTab();
     }
 
     /**
      * Rebuilds the list of active tabs based on the base tab and equipped backpack.
      */
     private static void rebuildTabList(InventoryTab baseTab) {
+        // Preserve existing tab active states before clearing
+        ContainerTab existingContainerTab = null;
+        BackpackTab existingBackpackTab = null;
+        for (InventoryTab tab : activeTabs) {
+            if (tab instanceof ContainerTab) {
+                existingContainerTab = (ContainerTab) tab;
+            } else if (tab instanceof BackpackTab) {
+                existingBackpackTab = (BackpackTab) tab;
+            }
+        }
+        
         activeTabs.clear(); // Clear before rebuilding to ensure correct order and prevent duplicates
+        
+        // Preserve active state for base tab if it's a ContainerTab
+        if (baseTab instanceof ContainerTab && existingContainerTab != null) {
+            baseTab.setActive(existingContainerTab.isActive());
+        }
+        
+        Player player = Minecraft.getInstance().player;
+        BackpackTab equippedBackpackTab = null;
+        if (player != null) {
+            // Get new tab from renderer
+            BackpackTab newEquippedTab = TabRenderer.getEquippedBackpackTab(player);
+            
+            // If we have both existing and new tab, preserve the active state
+            if (existingBackpackTab != null && newEquippedTab != null) {
+                newEquippedTab.setActive(existingBackpackTab.isActive());
+            }
+            
+            equippedBackpackTab = newEquippedTab;
+        }
+        
+        // Special case: Player opens backpack block while having equipped backpack
+        // Show block tab first, equipped backpack second, no player tab
+        if (baseTab instanceof ContainerTab && storedBlockPos != null && 
+            isBackpackBlock(Minecraft.getInstance().level, storedBlockPos) && 
+            equippedBackpackTab != null) {
+            activeTabs.add(baseTab); // Block backpack tab first
+            activeTabs.add(equippedBackpackTab); // Equipped backpack tab second
+            
+            // Only set active states if not tab switching (initial screen open)
+            if (!isTabSwitching) {
+                baseTab.setActive(true); // Block backpack tab is active
+                equippedBackpackTab.setActive(false); // Equipped backpack tab is inactive
+            }
+            return; // Don't add player tab in this case
+        }
+        
+        // Normal case: Add base tab if it exists
         if (baseTab != null) {
             activeTabs.add(baseTab);
+            // Only set active state if not tab switching
+            if (!isTabSwitching) {
+                baseTab.setActive(true); // Base tab is active
+            }
         }
 
-        Player player = Minecraft.getInstance().player;
-        if (player != null) {
-            BackpackTab backpackTab = TabRenderer.getEquippedBackpackTab(player);
-            if (backpackTab != null) {
-                activeTabs.add(backpackTab);
+        // Add equipped backpack tab if it exists
+        if (equippedBackpackTab != null) {
+            activeTabs.add(equippedBackpackTab);
+            // Only set active state if not tab switching
+            if (!isTabSwitching) {
+                equippedBackpackTab.setActive(baseTab == null); // Active only if no base tab
             }
         }
     }
@@ -145,21 +196,38 @@ public class InventoryTabManager {
         storedBlockPos = null;
         currentScreen = null;
         isTabSwitching = false;
+        isFromBlockClick = false;
         activeTabs.clear(); // Clear active tabs on reset
         CarriedItemUtil.reset(); // Also reset any stashed items
+    }
+
+    @SubscribeEvent
+    public static void onBlockRightClick(PlayerInteractEvent.RightClickBlock event) {
+        // Only handle client-side events
+        if (event.getLevel().isClientSide()) {
+            BlockPos clickedPos = event.getPos();
+            Level world = event.getLevel();
+            
+            if (isContainerBlock(world, clickedPos)) {
+                storedBlockPos = clickedPos;
+                isFromBlockClick = true;
+            }
+        }
     }
 
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)) return;
         
+        
         updateScreenState(containerScreen);
         
         InventoryTab baseTab = determineBaseTab(containerScreen);
         rebuildTabList(baseTab);
         
-        // Reset tab switching flag after screen opens
+        // Reset flags after screen opens
         isTabSwitching = false;
+        isFromBlockClick = false;
         
         // Retrieve any stashed carried item after screen opens
         Player player = Minecraft.getInstance().player;
@@ -274,6 +342,11 @@ public class InventoryTabManager {
         }
         
         try {
+            // Check if it's a BackpackBlock (which doesn't implement MenuProvider)
+            if (blockState.getBlock() instanceof BackpackBlock) {
+                return true; // BackpackBlocks are always valid if they exist
+            }
+            // Check for regular container blocks
             return blockState.getMenuProvider(world, pos) != null;
         } catch (Exception e) {
             return false; // If any error occurs, consider it invalid

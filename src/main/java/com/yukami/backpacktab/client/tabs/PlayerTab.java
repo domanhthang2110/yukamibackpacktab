@@ -20,6 +20,8 @@ import com.yukami.backpacktab.client.util.CarriedItemUtil;
 
 public class PlayerTab implements InventoryTab {
     
+    private boolean active = false;
+    
     public PlayerTab() {
         
     }
@@ -82,6 +84,16 @@ public class PlayerTab implements InventoryTab {
     @Override
     public boolean matchesCurrentScreen(AbstractContainerScreen<?> screen) {
         return screen instanceof InventoryScreen;
+    }
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+    
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override

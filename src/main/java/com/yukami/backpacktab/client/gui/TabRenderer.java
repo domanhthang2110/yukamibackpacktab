@@ -60,8 +60,9 @@ public class TabRenderer {
         for (int i = 0; i < activeTabs.size(); i++) {
             InventoryTab tab = activeTabs.get(i);
             int tabX = layout.getTabX(i, TAB_SPACING);
-            boolean active = tab.matchesCurrentScreen(screen);
+            boolean active = tab.isActive();
             boolean isFirstTab = (i == 0);
+            
             
             renderTab(guiGraphics, tab.getTabIcon(), tab.getHoverText(), 
                      tabX, layout.startY, TAB_WIDTH, TAB_HEIGHT, mouseX, mouseY, active, position, isFirstTab);
@@ -138,6 +139,13 @@ public class TabRenderer {
             int tabX = layout.getTabX(i, TAB_SPACING);
             
             if (mouseX >= tabX && mouseX <= tabX + TAB_WIDTH && mouseY >= layout.startY && mouseY <= layout.startY + TAB_HEIGHT) {
+                // Set all tabs to inactive, then set clicked tab to active
+                for (int j = 0; j < activeTabs.size(); j++) {
+                    InventoryTab allTab = activeTabs.get(j);
+                    boolean newActive = (j == i);
+                    allTab.setActive(newActive);
+                }
+                
                 Level world = player.level();
                 AbstractContainerMenu handler = player.containerMenu;
                 MultiPlayerGameMode gameMode = Minecraft.getInstance().gameMode;
