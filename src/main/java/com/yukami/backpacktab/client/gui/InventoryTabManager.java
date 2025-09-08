@@ -23,6 +23,8 @@ import com.yukami.backpacktab.client.tabs.ContainerTab;
 import com.yukami.backpacktab.client.tabs.InventoryTab;
 import com.yukami.backpacktab.client.tabs.PlayerTab;
 import com.yukami.backpacktab.client.util.CarriedItemUtil;
+import com.yukami.backpacktab.client.config.TabConfig;
+import net.minecraft.resources.ResourceLocation;
 
 @Mod.EventBusSubscriber(modid = "yukamibackpacktab", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class InventoryTabManager {
@@ -49,6 +51,12 @@ public class InventoryTabManager {
             if (blockState.getBlock() instanceof BackpackBlock) {
                 return true;
             }
+            
+            // Check if the block is in the additional configured blocks list
+            if (isAdditionalTabBlock(blockState)) {
+                return true;
+            }
+            
             // Check for regular container blocks
             return blockState.getMenuProvider(world, pos) != null;
         } catch (Exception e) {
@@ -68,6 +76,34 @@ public class InventoryTabManager {
         }
         BlockState blockState = world.getBlockState(pos);
         return blockState.getBlock() instanceof BackpackBlock;
+    }
+
+    /**
+     * Checks if the given block state matches any of the additional configured tab blocks.
+     * @param blockState The block state to check.
+     * @return True if the block is in the additional tab blocks configuration, false otherwise.
+     */
+    private static boolean isAdditionalTabBlock(BlockState blockState) {
+        try {
+            // Get the block's resource location (modID:block_name)
+            ResourceLocation blockId = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(blockState.getBlock());
+            if (blockId == null) {
+                return false;
+            }
+            
+            String blockIdString = blockId.toString();
+            
+            // Check if this block ID is in the configured additional tab blocks list
+            for (String configuredBlock : TabConfig.getAdditionalTabBlocks()) {
+                if (configuredBlock != null && configuredBlock.trim().equals(blockIdString)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -112,25 +148,24 @@ public class InventoryTabManager {
 
     /**
      * Rebuilds the list of active tabs based on the base tab and equipped backpack.
+     * Only shows tabs if there's an equipped backpack.
      */
     private static void rebuildTabList(InventoryTab baseTab) {
         // Preserve existing tab active states before clearing
         ContainerTab existingContainerTab = null;
         BackpackTab existingBackpackTab = null;
+        PlayerTab existingPlayerTab = null;
         for (InventoryTab tab : activeTabs) {
             if (tab instanceof ContainerTab) {
                 existingContainerTab = (ContainerTab) tab;
             } else if (tab instanceof BackpackTab) {
                 existingBackpackTab = (BackpackTab) tab;
+            } else if (tab instanceof PlayerTab) {
+                existingPlayerTab = (PlayerTab) tab;
             }
         }
         
         activeTabs.clear(); // Clear before rebuilding to ensure correct order and prevent duplicates
-        
-        // Preserve active state for base tab if it's a ContainerTab
-        if (baseTab instanceof ContainerTab && existingContainerTab != null) {
-            baseTab.setActive(existingContainerTab.isActive());
-        }
         
         Player player = Minecraft.getInstance().player;
         BackpackTab equippedBackpackTab = null;
@@ -146,11 +181,22 @@ public class InventoryTabManager {
             equippedBackpackTab = newEquippedTab;
         }
         
+        // REQUIREMENT: Only show tabs if there's an equipped backpack
+        if (equippedBackpackTab == null) {
+            return; // No equipped backpack = no tabs at all
+        }
+        
+        // Preserve active state for base tab
+        if (baseTab instanceof ContainerTab && existingContainerTab != null) {
+            baseTab.setActive(existingContainerTab.isActive());
+        } else if (baseTab instanceof PlayerTab && existingPlayerTab != null) {
+            baseTab.setActive(existingPlayerTab.isActive());
+        }
+        
         // Special case: Player opens backpack block while having equipped backpack
         // Show block tab first, equipped backpack second, no player tab
         if (baseTab instanceof ContainerTab && storedBlockPos != null && 
-            isBackpackBlock(Minecraft.getInstance().level, storedBlockPos) && 
-            equippedBackpackTab != null) {
+            isBackpackBlock(Minecraft.getInstance().level, storedBlockPos)) {
             activeTabs.add(baseTab); // Block backpack tab first
             activeTabs.add(equippedBackpackTab); // Equipped backpack tab second
             
@@ -171,15 +217,14 @@ public class InventoryTabManager {
             }
         }
 
-        // Add equipped backpack tab if it exists
-        if (equippedBackpackTab != null) {
-            activeTabs.add(equippedBackpackTab);
-            // Only set active state if not tab switching
-            if (!isTabSwitching) {
-                equippedBackpackTab.setActive(baseTab == null); // Active only if no base tab
-            }
+        // Add equipped backpack tab
+        activeTabs.add(equippedBackpackTab);
+        // Only set active state if not tab switching
+        if (!isTabSwitching) {
+            equippedBackpackTab.setActive(baseTab == null); // Active only if no base tab
         }
     }
+
 
     /**
      * Resets all static state variables of the tab manager.
@@ -216,6 +261,7 @@ public class InventoryTabManager {
         
         InventoryTab baseTab = determineBaseTab(containerScreen);
         rebuildTabList(baseTab);
+        
         
         // Reset flags after screen opens
         isTabSwitching = false;
@@ -338,6 +384,12 @@ public class InventoryTabManager {
             if (blockState.getBlock() instanceof BackpackBlock) {
                 return true; // BackpackBlocks are always valid if they exist
             }
+            
+            // Check if the block is in the additional configured blocks list
+            if (isAdditionalTabBlock(blockState)) {
+                return true; // Additional configured blocks are always valid if they exist
+            }
+            
             // Check for regular container blocks
             return blockState.getMenuProvider(world, pos) != null;
         } catch (Exception e) {

@@ -3,6 +3,8 @@ package com.yukami.backpacktab.client.config;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
+import java.util.List;
+import java.util.Arrays;
 
 public class TabConfig {
     
@@ -28,6 +30,7 @@ public class TabConfig {
     
     public static class Client {
         public final ForgeConfigSpec.EnumValue<TabPosition> tabPosition;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> additionalTabBlocks;
         
         public Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Yukami Backpack Tab Configuration")
@@ -38,12 +41,21 @@ public class TabConfig {
                         "Valid values: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT")
                 .defineEnum("tabPosition", TabPosition.TOP_LEFT);
             
+            additionalTabBlocks = builder
+                .comment("Additional blocks that should have tabs enabled",
+                        "Format: modID:block_name (e.g., 'minecraft:chest', 'sophisticatedbackpacks:backpack')")
+                .defineList("additionalTabBlocks", Arrays.asList(), obj -> obj instanceof String);
+            
             builder.pop();
         }
     }
     
     public static TabPosition getTabPosition() {
         return CLIENT.tabPosition.get();
+    }
+    
+    public static List<? extends String> getAdditionalTabBlocks() {
+        return CLIENT.additionalTabBlocks.get();
     }
     
     /**
