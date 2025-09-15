@@ -5,11 +5,16 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = mod_version
+version = "${minecraft_version}-${mod_version}"
 group = mod_group_id
 
 base {
     archivesName = mod_id
+}
+
+tasks.named("jar") {
+    // this string is appended after the version automatically
+    archiveClassifier.set("forge")
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
