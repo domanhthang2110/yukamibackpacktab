@@ -1,0 +1,407 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "SophisticatedBackpacks-1.21.8 - Client",
+      "presentation": {
+        "group": "Mod Development - SophisticatedBackpacks-1.21.8",
+        "order": 0
+      },
+      "projectName": "SophisticatedBackpacks-1.21.8",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dsophisticatedbackpacks%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\SophisticatedBackpacks-1.21.8\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "SophisticatedBackpacks-1.21.8 - Client2",
+      "presentation": {
+        "group": "Mod Development - SophisticatedBackpacks-1.21.8",
+        "order": 1
+      },
+      "projectName": "SophisticatedBackpacks-1.21.8",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\client2RunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\client2RunVmArgs.txt",
+        "-Dfml.modFolders\u003dsophisticatedbackpacks%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\SophisticatedBackpacks-1.21.8\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "SophisticatedBackpacks-1.21.8 - ClientData",
+      "presentation": {
+        "group": "Mod Development - SophisticatedBackpacks-1.21.8",
+        "order": 2
+      },
+      "projectName": "SophisticatedBackpacks-1.21.8",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\clientDataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\clientDataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dsophisticatedbackpacks%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\SophisticatedBackpacks-1.21.8\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "SophisticatedBackpacks-1.21.8 - Server",
+      "presentation": {
+        "group": "Mod Development - SophisticatedBackpacks-1.21.8",
+        "order": 3
+      },
+      "projectName": "SophisticatedBackpacks-1.21.8",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dsophisticatedbackpacks%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\SophisticatedBackpacks-1.21.8\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\SophisticatedBackpacks-1.21.8\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Yukamibackpacktab-template-1.21.8 - Client",
+      "presentation": {
+        "group": "NG - yukamibackpacktab-template-1.21.8",
+        "order": 0
+      },
+      "projectName": "yukamibackpacktab-template-1.21.8",
+      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+      "args": [
+        "--launchTarget",
+        "neoforgeclientdev",
+        "--version",
+        "21.8.46",
+        "--assetIndex",
+        "asset-index",
+        "--assetsDir",
+        "C:\\Users\\akuma\\.gradle\\caches\\minecraft\\assets",
+        "--fml.fmlVersion",
+        "9.0.18",
+        "--fml.mcVersion",
+        "1.21.8",
+        "--fml.neoForgeVersion",
+        "21.8.46",
+        "--fml.neoFormVersion",
+        "20250717.133445"
+      ],
+      "vmArgs": [
+        "-p",
+        "C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\bootstraplauncher\\9.0.18\\ec6c91c3e44cd3c77be98069010ce94b1555e292\\bootstraplauncher-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\securejarhandler\\9.0.18\\a130f48d1f454285428953ba2ab79861b7532db7\\securejarhandler-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged\\JarJarFileSystems\\0.4.1\\78f59f89defcd032ed788b151ca6a0d40ace796a\\JarJarFileSystems-0.4.1.jar",
+        "--add-modules",
+        "ALL-MODULE-PATH",
+        "--add-opens",
+        "java.base/java.util.jar\u003dcpw.mods.securejarhandler",
+        "--add-opens",
+        "java.base/java.lang.invoke\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "java.base/sun.security.util\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "jdk.naming.dns/com.sun.jndi.dns\u003djava.naming",
+        "-XX:HeapDumpPath\u003dMojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump",
+        "-Dforge.logging.markers\u003dREGISTRIES",
+        "-Dforge.logging.console.level\u003ddebug",
+        "-Dneoforge.enabledGameTestNamespaces\u003dyukamibackpacktab",
+        "-Dneoforge.enableGameTest\u003dtrue",
+        "-DlegacyClassPath.file\u003dF:\\backpack\\yukamibackpacktab-template-1.21.8\\.gradle\\configuration\\neoForm\\neoFormJoined1.21.8-20250717.133445\\steps\\writeMinecraftClasspathClient\\classpath.txt",
+        "-DignoreList\u003dmixinextras-neoforge-0.5.0.jar,client-extra,neoforge-",
+        "-Djava.net.preferIPv6Addresses\u003dsystem"
+      ],
+      "cwd": "${workspaceFolder}\\runs\\client",
+      "env": {
+        "MOD_CLASSES": "yukamibackpacktab-template-1.21.8%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\bin\\main"
+      },
+      "shortenCommandLine": "argfile"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Yukamibackpacktab-template-1.21.8 - ClientData",
+      "presentation": {
+        "group": "NG - yukamibackpacktab-template-1.21.8",
+        "order": 1
+      },
+      "projectName": "yukamibackpacktab-template-1.21.8",
+      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+      "args": [
+        "--mod",
+        "yukamibackpacktab",
+        "--all",
+        "--output",
+        "F:\\backpack\\yukamibackpacktab-template-1.21.8\\src\\generated\\resources",
+        "--existing",
+        "F:\\backpack\\yukamibackpacktab-template-1.21.8\\src\\main\\resources",
+        "--launchTarget",
+        "neoforgeclientdatadev",
+        "--assetIndex",
+        "asset-index",
+        "--assetsDir",
+        "C:\\Users\\akuma\\.gradle\\caches\\minecraft\\assets",
+        "--fml.fmlVersion",
+        "9.0.18",
+        "--fml.mcVersion",
+        "1.21.8",
+        "--fml.neoForgeVersion",
+        "21.8.46",
+        "--fml.neoFormVersion",
+        "20250717.133445"
+      ],
+      "vmArgs": [
+        "-p",
+        "C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\bootstraplauncher\\9.0.18\\ec6c91c3e44cd3c77be98069010ce94b1555e292\\bootstraplauncher-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\securejarhandler\\9.0.18\\a130f48d1f454285428953ba2ab79861b7532db7\\securejarhandler-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged\\JarJarFileSystems\\0.4.1\\78f59f89defcd032ed788b151ca6a0d40ace796a\\JarJarFileSystems-0.4.1.jar",
+        "--add-modules",
+        "ALL-MODULE-PATH",
+        "--add-opens",
+        "java.base/java.util.jar\u003dcpw.mods.securejarhandler",
+        "--add-opens",
+        "java.base/java.lang.invoke\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "java.base/sun.security.util\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "jdk.naming.dns/com.sun.jndi.dns\u003djava.naming",
+        "-XX:HeapDumpPath\u003dMojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump",
+        "-Dforge.logging.markers\u003dREGISTRIES",
+        "-Dforge.logging.console.level\u003ddebug",
+        "-DlegacyClassPath.file\u003dF:\\backpack\\yukamibackpacktab-template-1.21.8\\.gradle\\configuration\\neoForm\\neoFormJoined1.21.8-20250717.133445\\steps\\writeMinecraftClasspathClientData\\classpath.txt",
+        "-DignoreList\u003dmixinextras-neoforge-0.5.0.jar,client-extra,neoforge-",
+        "-Djava.net.preferIPv6Addresses\u003dsystem"
+      ],
+      "cwd": "${workspaceFolder}\\runs\\clientData",
+      "env": {
+        "MOD_CLASSES": "yukamibackpacktab-template-1.21.8%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\bin\\main"
+      },
+      "shortenCommandLine": "argfile"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Yukamibackpacktab-template-1.21.8 - GameTestServer",
+      "presentation": {
+        "group": "NG - yukamibackpacktab-template-1.21.8",
+        "order": 2
+      },
+      "projectName": "yukamibackpacktab-template-1.21.8",
+      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+      "args": [
+        "--launchTarget",
+        "neoforgegametestserverdev",
+        "--fml.fmlVersion",
+        "9.0.18",
+        "--fml.mcVersion",
+        "1.21.8",
+        "--fml.neoForgeVersion",
+        "21.8.46",
+        "--fml.neoFormVersion",
+        "20250717.133445"
+      ],
+      "vmArgs": [
+        "-p",
+        "C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\bootstraplauncher\\9.0.18\\ec6c91c3e44cd3c77be98069010ce94b1555e292\\bootstraplauncher-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\securejarhandler\\9.0.18\\a130f48d1f454285428953ba2ab79861b7532db7\\securejarhandler-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged\\JarJarFileSystems\\0.4.1\\78f59f89defcd032ed788b151ca6a0d40ace796a\\JarJarFileSystems-0.4.1.jar",
+        "--add-modules",
+        "ALL-MODULE-PATH",
+        "--add-opens",
+        "java.base/java.util.jar\u003dcpw.mods.securejarhandler",
+        "--add-opens",
+        "java.base/java.lang.invoke\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "java.base/sun.security.util\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "jdk.naming.dns/com.sun.jndi.dns\u003djava.naming",
+        "-Dforge.logging.markers\u003dREGISTRIES",
+        "-Dforge.logging.console.level\u003ddebug",
+        "-Dneoforge.enabledGameTestNamespaces\u003dyukamibackpacktab",
+        "-Dneoforge.enableGameTest\u003dtrue",
+        "-DlegacyClassPath.file\u003dF:\\backpack\\yukamibackpacktab-template-1.21.8\\.gradle\\configuration\\neoForm\\neoFormJoined1.21.8-20250717.133445\\steps\\writeMinecraftClasspathGameTestServer\\classpath.txt",
+        "-DignoreList\u003dmixinextras-neoforge-0.5.0.jar,client-extra,neoforge-",
+        "-Djava.net.preferIPv6Addresses\u003dsystem"
+      ],
+      "cwd": "${workspaceFolder}\\runs\\gameTestServer",
+      "env": {
+        "MOD_CLASSES": "yukamibackpacktab-template-1.21.8%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\bin\\main"
+      },
+      "shortenCommandLine": "argfile"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Yukamibackpacktab-template-1.21.8 - Junit",
+      "presentation": {
+        "group": "NG - yukamibackpacktab-template-1.21.8",
+        "order": 3
+      },
+      "projectName": "yukamibackpacktab-template-1.21.8",
+      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+      "args": [
+        "--launchTarget",
+        "neoforgejunitdev",
+        "--version",
+        "21.8.46",
+        "--assetIndex",
+        "asset-index",
+        "--assetsDir",
+        "C:\\Users\\akuma\\.gradle\\caches\\minecraft\\assets",
+        "--fml.fmlVersion",
+        "9.0.18",
+        "--fml.mcVersion",
+        "1.21.8",
+        "--fml.neoForgeVersion",
+        "21.8.46",
+        "--fml.neoFormVersion",
+        "20250717.133445"
+      ],
+      "vmArgs": [
+        "-p",
+        "C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\bootstraplauncher\\9.0.18\\ec6c91c3e44cd3c77be98069010ce94b1555e292\\bootstraplauncher-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\securejarhandler\\9.0.18\\a130f48d1f454285428953ba2ab79861b7532db7\\securejarhandler-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged\\JarJarFileSystems\\0.4.1\\78f59f89defcd032ed788b151ca6a0d40ace796a\\JarJarFileSystems-0.4.1.jar",
+        "--add-modules",
+        "ALL-MODULE-PATH",
+        "--add-opens",
+        "java.base/java.util.jar\u003dcpw.mods.securejarhandler",
+        "--add-opens",
+        "java.base/java.lang.invoke\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "java.base/sun.security.util\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "jdk.naming.dns/com.sun.jndi.dns\u003djava.naming",
+        "-XX:HeapDumpPath\u003dMojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump",
+        "-Dforge.logging.markers\u003dREGISTRIES",
+        "-Dforge.logging.console.level\u003ddebug",
+        "-DlegacyClassPath.file\u003dF:\\backpack\\yukamibackpacktab-template-1.21.8\\.gradle\\configuration\\neoForm\\neoFormJoined1.21.8-20250717.133445\\steps\\writeMinecraftClasspathJunit\\classpath.txt",
+        "-DignoreList\u003dmixinextras-neoforge-0.5.0.jar,client-extra,neoforge-",
+        "-Djava.net.preferIPv6Addresses\u003dsystem"
+      ],
+      "cwd": "${workspaceFolder}\\runs\\junit",
+      "env": {
+        "MOD_CLASSES": "yukamibackpacktab-template-1.21.8%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\bin\\main"
+      },
+      "shortenCommandLine": "argfile"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Yukamibackpacktab-template-1.21.8 - Server",
+      "presentation": {
+        "group": "NG - yukamibackpacktab-template-1.21.8",
+        "order": 4
+      },
+      "projectName": "yukamibackpacktab-template-1.21.8",
+      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+      "args": [
+        "--nogui",
+        "--launchTarget",
+        "neoforgeserverdev",
+        "--fml.fmlVersion",
+        "9.0.18",
+        "--fml.mcVersion",
+        "1.21.8",
+        "--fml.neoForgeVersion",
+        "21.8.46",
+        "--fml.neoFormVersion",
+        "20250717.133445"
+      ],
+      "vmArgs": [
+        "-p",
+        "C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\bootstraplauncher\\9.0.18\\ec6c91c3e44cd3c77be98069010ce94b1555e292\\bootstraplauncher-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\securejarhandler\\9.0.18\\a130f48d1f454285428953ba2ab79861b7532db7\\securejarhandler-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged\\JarJarFileSystems\\0.4.1\\78f59f89defcd032ed788b151ca6a0d40ace796a\\JarJarFileSystems-0.4.1.jar",
+        "--add-modules",
+        "ALL-MODULE-PATH",
+        "--add-opens",
+        "java.base/java.util.jar\u003dcpw.mods.securejarhandler",
+        "--add-opens",
+        "java.base/java.lang.invoke\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "java.base/sun.security.util\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "jdk.naming.dns/com.sun.jndi.dns\u003djava.naming",
+        "-Dforge.logging.markers\u003dREGISTRIES",
+        "-Dforge.logging.console.level\u003ddebug",
+        "-Dneoforge.enabledGameTestNamespaces\u003dyukamibackpacktab",
+        "-DlegacyClassPath.file\u003dF:\\backpack\\yukamibackpacktab-template-1.21.8\\.gradle\\configuration\\neoForm\\neoFormJoined1.21.8-20250717.133445\\steps\\writeMinecraftClasspathServer\\classpath.txt",
+        "-DignoreList\u003dmixinextras-neoforge-0.5.0.jar,client-extra,neoforge-",
+        "-Djava.net.preferIPv6Addresses\u003dsystem"
+      ],
+      "cwd": "${workspaceFolder}\\runs\\server",
+      "env": {
+        "MOD_CLASSES": "yukamibackpacktab-template-1.21.8%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\bin\\main"
+      },
+      "shortenCommandLine": "argfile"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Yukamibackpacktab-template-1.21.8 - ServerData",
+      "presentation": {
+        "group": "NG - yukamibackpacktab-template-1.21.8",
+        "order": 5
+      },
+      "projectName": "yukamibackpacktab-template-1.21.8",
+      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+      "args": [
+        "--launchTarget",
+        "neoforgeserverdatadev",
+        "--fml.fmlVersion",
+        "9.0.18",
+        "--fml.mcVersion",
+        "1.21.8",
+        "--fml.neoForgeVersion",
+        "21.8.46",
+        "--fml.neoFormVersion",
+        "20250717.133445"
+      ],
+      "vmArgs": [
+        "-p",
+        "C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\bootstraplauncher\\9.0.18\\ec6c91c3e44cd3c77be98069010ce94b1555e292\\bootstraplauncher-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged.fancymodloader\\securejarhandler\\9.0.18\\a130f48d1f454285428953ba2ab79861b7532db7\\securejarhandler-9.0.18.jar;C:\\Users\\akuma\\.gradle\\caches\\modules-2\\files-2.1\\net.neoforged\\JarJarFileSystems\\0.4.1\\78f59f89defcd032ed788b151ca6a0d40ace796a\\JarJarFileSystems-0.4.1.jar",
+        "--add-modules",
+        "ALL-MODULE-PATH",
+        "--add-opens",
+        "java.base/java.util.jar\u003dcpw.mods.securejarhandler",
+        "--add-opens",
+        "java.base/java.lang.invoke\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "java.base/sun.security.util\u003dcpw.mods.securejarhandler",
+        "--add-exports",
+        "jdk.naming.dns/com.sun.jndi.dns\u003djava.naming",
+        "-Dforge.logging.markers\u003dREGISTRIES",
+        "-Dforge.logging.console.level\u003ddebug",
+        "-DlegacyClassPath.file\u003dF:\\backpack\\yukamibackpacktab-template-1.21.8\\.gradle\\configuration\\neoForm\\neoFormJoined1.21.8-20250717.133445\\steps\\writeMinecraftClasspathServerData\\classpath.txt",
+        "-DignoreList\u003dmixinextras-neoforge-0.5.0.jar,client-extra,neoforge-",
+        "-Djava.net.preferIPv6Addresses\u003dsystem"
+      ],
+      "cwd": "${workspaceFolder}\\runs\\serverData",
+      "env": {
+        "MOD_CLASSES": "yukamibackpacktab-template-1.21.8%%F:\\backpack\\yukamibackpacktab-template-1.21.8\\bin\\main"
+      },
+      "shortenCommandLine": "argfile"
+    }
+  ]
+}
