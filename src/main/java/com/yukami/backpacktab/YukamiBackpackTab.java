@@ -2,7 +2,6 @@ package com.yukami.backpacktab;
 
 import com.mojang.logging.LogUtils;
 import com.yukami.backpacktab.client.config.TabConfig;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;

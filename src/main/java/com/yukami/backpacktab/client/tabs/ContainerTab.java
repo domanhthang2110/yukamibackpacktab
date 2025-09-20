@@ -73,16 +73,7 @@ public class ContainerTab implements InventoryTab {
         
         try {
             if (containerPos != null) {
-                // Step 1: Stash carried item in inventory slot before closing container
-                CarriedItemUtil.stashCarriedItem(localPlayer, gameMode, handler);
-                
-                // Step 2: Inform the server that the current container is being closed.
-                // This is necessary to prevent desynchronization issues.
-                if (handler != null && localPlayer.connection != null) {
-                    localPlayer.connection.send(new ServerboundContainerClosePacket(handler.containerId));
-                }
-                
-                // Step 3: Simulate a right-click on the target block to open its GUI.
+                // Simulate a right-click on the target block to open its GUI.
                 // We create a "hit result" to specify which block we are "clicking".
                 Vec3 hitVec = Vec3.atCenterOf(containerPos);
                 BlockHitResult hitResult = new BlockHitResult(hitVec, Direction.UP, containerPos, false);

@@ -32,13 +32,13 @@ public class CarriedItemUtil {
                 int screenSlotIndex = findScreenSlotIndex(player, containerMenu, emptyInventorySlot);
                 
                 if (screenSlotIndex != -1) {
-                    // Simulate a PICKUP click to move the carried item into the empty slot
+                    // Use gameMode.handleInventoryMouseClick like inventory tabs does with manager.clickSlot
                     gameMode.handleInventoryMouseClick(
-                            containerMenu.containerId,
-                            screenSlotIndex,
-                            0, // Left click
-                            ClickType.PICKUP,
-                            player
+                        containerMenu.containerId,
+                        screenSlotIndex,
+                        0, // Left click
+                        ClickType.PICKUP,
+                        player
                     );
                     stashedSlotIndex = emptyInventorySlot; // Remember where we stashed it
                 }
@@ -61,14 +61,17 @@ public class CarriedItemUtil {
             int screenSlotIndex = findScreenSlotIndex(player, containerMenu, stashedSlotIndex);
             
             if (screenSlotIndex != -1) {
-                // Simulate a PICKUP click to move the item from the stashed slot back to the cursor
-                gameMode.handleInventoryMouseClick(
+                // Only unstash if cursor is currently empty
+                if (containerMenu.getCarried().isEmpty()) {
+                    // Use gameMode.handleInventoryMouseClick like inventory tabs does with manager.clickSlot
+                    gameMode.handleInventoryMouseClick(
                         containerMenu.containerId,
                         screenSlotIndex,
                         0, // Left click
                         ClickType.PICKUP,
                         player
-                );
+                    );
+                }
             }
             stashedSlotIndex = -1; // Reset the stashed slot
         }

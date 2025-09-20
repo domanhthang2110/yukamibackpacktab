@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.GameType;
 import com.mojang.authlib.GameProfile;
 import com.yukami.backpacktab.client.util.CarriedItemUtil;
+import static com.yukami.backpacktab.YukamiBackpackTab.LOGGER;
 
 public class PlayerTab implements InventoryTab {
     
@@ -60,16 +61,21 @@ public class PlayerTab implements InventoryTab {
     public void open(Player player, Level world, AbstractContainerMenu handler, MultiPlayerGameMode gameMode) {
         if (player == null || gameMode == null || !(player instanceof LocalPlayer localPlayer)) return;
 
-        // Stash carried item in inventory slot before opening the screen
-        CarriedItemUtil.stashCarriedItem(localPlayer, gameMode, handler);
-
-        // If we are currently in a server-side container (not player inventory), close it first
-        if (handler != null && !(handler instanceof InventoryMenu) && localPlayer.connection != null) {
-            localPlayer.connection.send(new ServerboundContainerClosePacket(handler.containerId));
-        }
+        LOGGER.info("PlayerTab.open() START - Current handler: {}, containerId: {}", 
+                   handler != null ? handler.getClass().getSimpleName() : "null", 
+                   handler != null ? handler.containerId : "null");
+        LOGGER.info("PlayerTab.open() - Player containerMenu: {}, containerId: {}", 
+                   localPlayer.containerMenu.getClass().getSimpleName(), 
+                   localPlayer.containerMenu.containerId);
 
         if (gameMode.getPlayerMode() == GameType.SURVIVAL || gameMode.getPlayerMode() == GameType.ADVENTURE) {
+            LOGGER.info("PlayerTab.open() - Opening InventoryScreen");
+            // Force the player to use their inventory menu like vanilla does
+            localPlayer.containerMenu = localPlayer.inventoryMenu;
             Minecraft.getInstance().setScreen(new InventoryScreen(localPlayer));
+            LOGGER.info("PlayerTab.open() END - Player containerMenu after screen open: {}, containerId: {}", 
+                       localPlayer.containerMenu.getClass().getSimpleName(), 
+                       localPlayer.containerMenu.containerId);
         }
     }
     

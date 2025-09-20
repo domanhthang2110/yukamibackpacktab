@@ -41,9 +41,6 @@ public class BackpackTab implements InventoryTab {
         if (player == null || gameMode == null || !(player instanceof LocalPlayer localPlayer)) return;
         
         try {
-            // Stash carried item in inventory slot before operations
-            CarriedItemUtil.stashCarriedItem(localPlayer, gameMode, handler);
-            
             PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
                 if (ItemStack.isSameItem(backpack, backpackStack)) {
                     ClientPacketDistributor.sendToServer(new BackpackOpenPayload(slot, identifier, inventoryName));
