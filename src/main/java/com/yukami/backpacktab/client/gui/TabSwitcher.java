@@ -4,7 +4,6 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 
 import com.yukami.backpacktab.client.tabs.InventoryTab;
 import com.yukami.backpacktab.client.util.CarriedItemUtil;

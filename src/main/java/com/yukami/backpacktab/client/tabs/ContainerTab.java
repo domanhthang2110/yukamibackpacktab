@@ -1,9 +1,5 @@
 package com.yukami.backpacktab.client.tabs;
 
-import com.yukami.backpacktab.client.util.CarriedItemUtil;
-
-import static com.yukami.backpacktab.YukamiBackpackTab.LOGGER;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -11,7 +7,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -49,7 +44,7 @@ public class ContainerTab implements InventoryTab {
                             }
                         }
                     } catch (Exception e) {
-                        LOGGER.error("Error getting backpack from block entity: {}", e.getMessage());
+                        // Silently handle block entity errors
                     }
                 }
                 
