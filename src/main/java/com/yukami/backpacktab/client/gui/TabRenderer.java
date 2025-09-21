@@ -1,260 +1,152 @@
 package com.yukami.backpacktab.client.gui;
 
 import com.yukami.backpacktab.client.config.TabConfig;
-import com.yukami.backpacktab.client.tabs.BackpackTab;
 import com.yukami.backpacktab.client.tabs.InventoryTab;
-import com.yukami.backpacktab.client.util.TabPositionCalculator;
-
-import static com.yukami.backpacktab.YukamiBackpackTab.LOGGER;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-// import net.minecraft.client.renderer.RenderPipelines; // Not available in 1.21.1
 
+/**
+ * Optimized TabRenderer for 1.21.1 - uses individual sprites like 1.21.8 with optimizations from 1.20.1
+ */
 public class TabRenderer {
 
-    // Individual tab sprites for 1.21.8
-    private static final int TAB_TEXTURE_WIDTH = 26;
-    private static final int TAB_TEXTURE_HEIGHT = 32;
+    private static final int TAB_WIDTH = 26;
+    private static final int TAB_HEIGHT = 32;
+    private static final int TAB_SPACING = 26;
+    private static final int ITEM_OFFSET_X = 5;
+    private static final int ITEM_OFFSET_Y = 8;
     
-    private static ResourceLocation getTabSprite(TabConfig.TabPosition position, boolean active, boolean isFirstTab) {
-        String state = active ? "selected" : "unselected";
-        String positionName;
-        String tabNumber;
-        
-        switch (position) {
-            case TOP_LEFT -> {
-                positionName = "top";
-                tabNumber = isFirstTab ? "1" : "2";  // 1 for first, 2 for any middle
-            }
-            case TOP_RIGHT -> {
-                positionName = "top";
-                tabNumber = isFirstTab ? "7" : "2";  // 7 for first right, 2 for any middle
-            }
-            case BOTTOM_LEFT -> {
-                positionName = "bottom";
-                tabNumber = isFirstTab ? "1" : "2";  // 1 for first, 2 for any middle
-            }
-            case BOTTOM_RIGHT -> {
-                positionName = "bottom";
-                tabNumber = isFirstTab ? "7" : "2";  // 7 for first right, 2 for any middle
-            }
-            default -> {
-                positionName = "top";
-                tabNumber = "1";
-            }
+    private static final int TOP_TAB_BASE_OFFSET = 4;
+    private static final int TOP_ACTIVE_Y_ADJUST = 0;
+    private static final int TOP_INACTIVE_Y_ADJUST = 1;
+    private static final int TOP_INACTIVE_HEIGHT = 27;
+    
+    private static final int BOTTOM_TAB_BASE_OFFSET = -4;
+    private static final int BOTTOM_ACTIVE_Y_ADJUST = 0;
+    private static final int BOTTOM_INACTIVE_Y_ADJUST = 3;
+    private static final int BOTTOM_INACTIVE_HEIGHT = 29;
+    private static TabConfig.TabPosition cachedTabPosition = null;
+    
+    private static TabConfig.TabPosition getTabPosition() {
+        if (cachedTabPosition == null) {
+            cachedTabPosition = TabConfig.getTabPosition();
         }
-        
+        return cachedTabPosition;
+    }
+    
+
+    private static ResourceLocation getTabSprite(boolean active, boolean isFirstTab) {
+        TabConfig.TabPosition position = getTabPosition();
+        String state = active ? "selected" : "unselected";
+        String tabNumber = isFirstTab ? (position.isRight() ? "7" : "1") : "2";
+        String positionName = position.isBottom() ? "bottom" : "top";
         return ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_" + positionName + "_" + state + "_" + tabNumber);
     }
 
-    // Define constants for tab dimensions
-    public static final int TAB_WIDTH = 28;
-    public static final int TAB_HEIGHT = 32;
-    public static final int TAB_SPACING = TAB_WIDTH - 2; // Keep current spacing
+    private static int getTabX(int tabIndex, TabConfig.TabPosition position, AbstractContainerScreen<?> screen) {
+        int screenWidth = screen.getXSize();
+        
+        return switch (position) {
+            case TOP_LEFT, BOTTOM_LEFT -> tabIndex * TAB_SPACING;
+            case TOP_RIGHT, BOTTOM_RIGHT -> screenWidth - TAB_WIDTH - (tabIndex * TAB_SPACING);
+        };
+    }
+    
+    private static int getTabY(TabConfig.TabPosition position, AbstractContainerScreen<?> screen, boolean active) {
+        int screenHeight = screen.getYSize();
+        
+        return switch (position) {
+            case TOP_LEFT, TOP_RIGHT -> 
+                -TAB_HEIGHT + TOP_TAB_BASE_OFFSET + (active ? TOP_ACTIVE_Y_ADJUST : TOP_INACTIVE_Y_ADJUST);
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> 
+                screenHeight + BOTTOM_TAB_BASE_OFFSET + (active ? BOTTOM_ACTIVE_Y_ADJUST : BOTTOM_INACTIVE_Y_ADJUST);
+        };
+    }
+    
+    private static int getTabHeight(TabConfig.TabPosition position, boolean active) {
+        if (active) return TAB_HEIGHT;
+        return position.isBottom() ? BOTTOM_INACTIVE_HEIGHT : TOP_INACTIVE_HEIGHT;
+    }
 
+    public static void invalidateCache() {
+        cachedTabPosition = null;
+    }
 
-    /**
-     * Renders all tabs with height clipping for inactive tabs
-     */
     public static void renderTabs(GuiGraphics guiGraphics, AbstractContainerScreen<?> screen, int mouseX, int mouseY) {
-        if (screen == null) return;
+        var tabs = TabManager.getActiveTabs();
+        if (tabs.isEmpty()) return;
         
-        Player player = Minecraft.getInstance().player;
-        if (player == null) return;
-
-        // If there's a stored block and it's no longer valid, don't render any tabs
-        if (InventoryTabManager.getStoredBlockPos() != null && !InventoryTabManager.isBlockStillValid(InventoryTabManager.getStoredBlockPos())) {
-            return;
-        }
+        TabConfig.TabPosition position = getTabPosition();
         
-        java.util.List<InventoryTab> activeTabs = InventoryTabManager.getActiveTabs();
-        if (activeTabs.isEmpty()) {
-            return;
-        }
+        // Convert mouse coordinates to screen-relative for tooltip detection
+        int localMouseX = mouseX - screen.getGuiLeft();
+        int localMouseY = mouseY - screen.getGuiTop();
         
-        TabConfig.TabPosition position = TabConfig.getTabPosition();
-        
-        TabPositionCalculator.TabLayout layout = TabPositionCalculator.calculateLayout(
-            position, 0, 0, screen.getXSize(), screen.getYSize(), TAB_WIDTH, TAB_HEIGHT
-        );
-        
-        for (int i = 0; i < activeTabs.size(); i++) {
-            InventoryTab tab = activeTabs.get(i);
-            int tabX = layout.getTabX(i, TAB_SPACING);
-            boolean active = tab.isActive();
-            boolean isFirstTab = (i == 0);
-            
-            
-            renderTab(guiGraphics, tab.getTabIcon(), tab.getHoverText(), 
-                     tabX, layout.startY, TAB_WIDTH, TAB_HEIGHT, mouseX, mouseY, active, position, isFirstTab);
-        }
-        
-        // Render tooltips after all tabs to ensure proper Z-ordering
-        renderTabTooltips(guiGraphics, screen, mouseX, mouseY);
-    }
-
-    /**
-     * Renders a single tab with the given parameters
-     */
-    private static void renderTab(GuiGraphics guiGraphics, ItemStack icon, net.minecraft.network.chat.Component hoverText, 
-                                 int x, int y, int width, int height, double mouseX, double mouseY, 
-                                 boolean active, TabConfig.TabPosition position, boolean isFirstTab) {
-        
-        // Get the appropriate sprite for this tab
-        ResourceLocation tabSprite = getTabSprite(position, active, isFirstTab);
-        
-        int renderHeight = TAB_TEXTURE_HEIGHT;
-        int yOffset = 0;
-
-        if (!active) {
-            
-            if (position == TabConfig.TabPosition.TOP_LEFT || position == TabConfig.TabPosition.TOP_RIGHT) {
-                yOffset = 1; // Shift up by 2px
-                renderHeight = 28; // Reintroduce clipping for inactive tabs
-            } else if (position == TabConfig.TabPosition.BOTTOM_LEFT || position == TabConfig.TabPosition.BOTTOM_RIGHT) {
-                yOffset = 2; // Shift down by 2px
-                renderHeight = 30; // Reintroduce clipping for inactive tabs
-            }
-        }
-
-        // Debug: Log coordinates to see what we're getting
-        LOGGER.info("Rendering tab at x={}, y={}, yOffset={}, final y={}", x, y, yOffset, y + yOffset);
-        
-        // Use the same method as Minecraft's creative inventory (1.21.1 version)
-        guiGraphics.blitSprite(tabSprite, x, y + yOffset, TAB_TEXTURE_WIDTH, renderHeight);
-        int itemPadding = Math.max(0, (width - 16) / 2);
-        int itemX = x + itemPadding - 1;
-        int itemY = y + itemPadding + 1; // Adjusted to center the icon
-        guiGraphics.renderItem(icon, itemX, itemY);
-
-        // Note: Tooltip rendering moved to separate method to ensure proper Z-ordering
-    }
-
-    /**
-     * Renders tooltips for tabs (called after all tabs are rendered for proper Z-ordering)
-     */
-    private static void renderTabTooltips(GuiGraphics guiGraphics, AbstractContainerScreen<?> screen, int mouseX, int mouseY) {
-        if (screen == null) return;
-        
-        Player player = Minecraft.getInstance().player;
-        if (player == null) return;
-
-        // If there's a stored block and it's no longer valid, don't render any tooltips
-        if (InventoryTabManager.getStoredBlockPos() != null && !InventoryTabManager.isBlockStillValid(InventoryTabManager.getStoredBlockPos())) {
-            return;
-        }
-        
-        java.util.List<InventoryTab> activeTabs = InventoryTabManager.getActiveTabs();
-        if (activeTabs.isEmpty()) {
-            return;
-        }
-        
-        TabConfig.TabPosition position = TabConfig.getTabPosition();
-        
-        TabPositionCalculator.TabLayout layout = TabPositionCalculator.calculateLayout(
-            position, screen.getGuiLeft(), screen.getGuiTop(), screen.getXSize(), screen.getYSize(), TAB_WIDTH, TAB_HEIGHT
-        );
-        
-        for (int i = 0; i < activeTabs.size(); i++) {
-            InventoryTab tab = activeTabs.get(i);
-            int tabX = layout.getTabX(i, TAB_SPACING);
+        for (int i = 0; i < tabs.size(); i++) {
+            InventoryTab tab = tabs.get(i);
             boolean active = tab.isActive();
             
-            int renderHeight = TAB_TEXTURE_HEIGHT;
-            int yOffset = 0;
-
-            if (!active) {
-                if (position == TabConfig.TabPosition.TOP_LEFT || position == TabConfig.TabPosition.TOP_RIGHT) {
-                    renderHeight = 28;
-                } else if (position == TabConfig.TabPosition.BOTTOM_LEFT || position == TabConfig.TabPosition.BOTTOM_RIGHT) {
-                    renderHeight = 28;
-                    yOffset = 4;
-                }
-            }
+            int x = getTabX(i, position, screen);
+            int y = getTabY(position, screen, active);
+            int height = getTabHeight(position, active);
             
-            if (mouseX >= tabX && mouseX < tabX + TAB_WIDTH && mouseY >= layout.startY + yOffset && mouseY < layout.startY + yOffset + renderHeight) {
-                guiGraphics.renderTooltip(Minecraft.getInstance().font, tab.getHoverText(), (int) (mouseX - screen.getGuiLeft()), (int) (mouseY - screen.getGuiTop()));
-                break; // Only render one tooltip at a time
+            ResourceLocation sprite = getTabSprite(active, i == 0);
+            guiGraphics.blitSprite(sprite, x, y, TAB_WIDTH, height);
+            
+            int itemX = x + ITEM_OFFSET_X;
+            int itemY = y + ITEM_OFFSET_Y;
+            if (!active && position.isBottom()) {
+                itemY -= 2;
+            } else if (!active && !position.isBottom()) {
+                itemY -= 1;
+            }
+            guiGraphics.renderItem(tab.getTabIcon(), itemX, itemY);
+            
+            // Tooltip
+            if (localMouseX >= x && localMouseX < x + TAB_WIDTH && localMouseY >= y && localMouseY < y + height) {
+                guiGraphics.renderTooltip(Minecraft.getInstance().font, tab.getHoverText(), mouseX, mouseY);
             }
         }
     }
 
-    /**
-     * Handles tab click detection and opening
-     */
-    public static boolean handleTabClick(double mouseX, double mouseY, int button, AbstractContainerScreen<?> currentScreen) {
-        if (currentScreen == null || button != 0) return false;
+
+    public static boolean handleTabClick(double mouseX, double mouseY, int button, AbstractContainerScreen<?> screen) {
+        if (button != 0) return false;
         
-        Player player = Minecraft.getInstance().player;
+        Minecraft minecraft = Minecraft.getInstance();
+        Player player = minecraft.player;
         if (player == null) return false;
 
-        // If there's a stored block and it's no longer valid, don't allow any tab clicks
-        if (InventoryTabManager.getStoredBlockPos() != null && !InventoryTabManager.isBlockStillValid(InventoryTabManager.getStoredBlockPos())) {
-            return false;
-        }
+        var tabs = TabManager.getActiveTabs();
+        if (tabs.isEmpty()) return false;
         
-        java.util.List<InventoryTab> activeTabs = InventoryTabManager.getActiveTabs();
-        if (activeTabs.isEmpty()) {
-            return false;
-        }
+        TabConfig.TabPosition position = getTabPosition();
         
-        TabConfig.TabPosition position = TabConfig.getTabPosition(); // Declare position here
-        TabPositionCalculator.TabLayout layout = TabPositionCalculator.calculateLayout(
-            position, currentScreen.getGuiLeft(), currentScreen.getGuiTop(), currentScreen.getXSize(), currentScreen.getYSize(), TAB_WIDTH, TAB_HEIGHT
-        );
+        // Convert mouse coordinates to screen-relative for click detection
+        double localMouseX = mouseX - screen.getGuiLeft();
+        double localMouseY = mouseY - screen.getGuiTop();
         
-        for (int i = 0; i < activeTabs.size(); i++) {
-            InventoryTab tab = activeTabs.get(i);
-            int tabX = layout.getTabX(i, TAB_SPACING);
+        for (int i = 0; i < tabs.size(); i++) {
+            InventoryTab tab = tabs.get(i);
+            boolean active = tab.isActive();
             
-            if (mouseX >= tabX && mouseX <= tabX + TAB_WIDTH && mouseY >= layout.startY && mouseY <= layout.startY + TAB_HEIGHT) {
-                // Set all tabs to inactive, then set clicked tab to active
-                for (int j = 0; j < activeTabs.size(); j++) {
-                    InventoryTab allTab = activeTabs.get(j);
-                    boolean newActive = (j == i);
-                    allTab.setActive(newActive);
-                }
+            // Get position using the 2 functions
+            int x = getTabX(i, position, screen);
+            int y = getTabY(position, screen, active);
+            int height = getTabHeight(position, active);
+            
+            if (localMouseX >= x && localMouseX < x + TAB_WIDTH && 
+                localMouseY >= y && localMouseY < y + height) {
                 
-                Level world = player.level();
-                AbstractContainerMenu handler = player.containerMenu;
-                MultiPlayerGameMode gameMode = Minecraft.getInstance().gameMode;
-                
-                tab.open(player, world, handler, gameMode);
+                tabs.forEach(t -> t.setActive(t == tab));
+                TabSwitcher.switchToTab(tab, player, minecraft.gameMode);
                 return true;
             }
         }
-        
         return false;
-    }
-
-    /**
-     * Gets the currently equipped backpack tab using Sophisticated Backpacks' PlayerInventoryProvider
-     */
-    public static BackpackTab getEquippedBackpackTab(Player player) {
-        try {
-            BackpackTab[] foundTab = {null};
-            
-            PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
-                if ("main".equals(inventoryName)) {
-                    return false;
-                }
-                foundTab[0] = new BackpackTab(backpack);
-                return true;
-            });
-            
-            return foundTab[0];
-        } catch (Exception e) {
-            LOGGER.error("Error getting equipped backpack tab: {}", e.getMessage());
-        }
-        return null;
     }
 }

@@ -2,19 +2,21 @@ package com.yukami.backpacktab.client.tabs;
 
 import com.yukami.backpacktab.client.util.CarriedItemUtil;
 
-import static com.yukami.backpacktab.YukamiBackpackTab.LOGGER;
-
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.IBackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenPayload;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 public class BackpackTab implements InventoryTab {
@@ -52,7 +54,7 @@ public class BackpackTab implements InventoryTab {
                 return false; // Continue searching
             });
         } catch (Exception e) {
-            LOGGER.error("Error opening backpack: {}", e.getMessage());
+            // Silently handle backpack opening errors
         }
     }
     
@@ -69,12 +71,12 @@ public class BackpackTab implements InventoryTab {
         
         // Check if we're in a block context - if so, this equipped backpack tab should NOT be active
         // The block's ContainerTab should be active instead
-        net.minecraft.core.BlockPos storedPos = com.yukami.backpacktab.client.gui.InventoryTabManager.getStoredBlockPos();
+        BlockPos storedPos = com.yukami.backpacktab.client.gui.TabManager.getStoredBlockPos();
         if (storedPos != null) {
-            net.minecraft.world.level.Level world = net.minecraft.client.Minecraft.getInstance().level;
+            Level world = Minecraft.getInstance().level;
             if (world != null) {
-                net.minecraft.world.level.block.state.BlockState blockState = world.getBlockState(storedPos);
-                if (blockState.getBlock() instanceof net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock) {
+                BlockState blockState = world.getBlockState(storedPos);
+                if (blockState.getBlock() instanceof BackpackBlock) {
                     // We're viewing a backpack block, so this equipped backpack tab should NOT be active
                     return false;
                 }

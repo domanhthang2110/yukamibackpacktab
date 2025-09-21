@@ -2,7 +2,6 @@ package com.yukami.backpacktab.client.tabs;
 
 import com.yukami.backpacktab.client.util.CarriedItemUtil;
 
-import static com.yukami.backpacktab.YukamiBackpackTab.LOGGER;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -49,7 +48,7 @@ public class ContainerTab implements InventoryTab {
                             }
                         }
                     } catch (Exception e) {
-                        LOGGER.error("Error getting backpack from block entity: {}", e.getMessage());
+                        // Silently handle block entity errors
                     }
                 }
                 
