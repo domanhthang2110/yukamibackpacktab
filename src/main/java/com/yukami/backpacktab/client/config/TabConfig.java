@@ -12,7 +12,15 @@ public class TabConfig {
         TOP_LEFT,
         TOP_RIGHT,
         BOTTOM_LEFT,
-        BOTTOM_RIGHT
+        BOTTOM_RIGHT;
+
+        public boolean isBottom() {
+            return this == BOTTOM_LEFT || this == BOTTOM_RIGHT;
+        }
+
+        public boolean isRight() {
+            return this == TOP_RIGHT || this == BOTTOM_RIGHT;
+        }
     }
     
     public static final ForgeConfigSpec CLIENT_SPEC;

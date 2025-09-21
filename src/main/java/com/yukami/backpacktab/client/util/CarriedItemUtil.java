@@ -22,25 +22,22 @@ public class CarriedItemUtil {
      * @param containerMenu The currently open container menu.
      */
     public static void stashCarriedItem(LocalPlayer player, MultiPlayerGameMode gameMode, AbstractContainerMenu containerMenu) {
-        // Only stash if the player is actually carrying an item
         if (!containerMenu.getCarried().isEmpty()) {
-            // Find an empty slot in the player's main inventory
             int emptyInventorySlot = player.getInventory().getFreeSlot();
 
             if (emptyInventorySlot != -1) {
-                // Find the corresponding screen slot index for this inventory slot
                 int screenSlotIndex = findScreenSlotIndex(player, containerMenu, emptyInventorySlot);
                 
                 if (screenSlotIndex != -1) {
-                    // Simulate a PICKUP click to move the carried item into the empty slot
                     gameMode.handleInventoryMouseClick(
                             containerMenu.containerId,
                             screenSlotIndex,
-                            0, // Left click
+                            0,
                             ClickType.PICKUP,
                             player
                     );
-                    stashedSlotIndex = emptyInventorySlot; // Remember where we stashed it
+                    stashedSlotIndex = emptyInventorySlot;
+                    // Item stashed successfully
                 }
             }
         }
@@ -55,22 +52,20 @@ public class CarriedItemUtil {
      * @param containerMenu The currently open container menu.
      */
     public static void unstashCarriedItem(LocalPlayer player, MultiPlayerGameMode gameMode, AbstractContainerMenu containerMenu) {
-        // Only attempt to unstash if an item was previously stashed
         if (stashedSlotIndex != -1) {
-            // Find the corresponding screen slot index for the stashed item's inventory slot
             int screenSlotIndex = findScreenSlotIndex(player, containerMenu, stashedSlotIndex);
             
             if (screenSlotIndex != -1) {
-                // Simulate a PICKUP click to move the item from the stashed slot back to the cursor
                 gameMode.handleInventoryMouseClick(
                         containerMenu.containerId,
                         screenSlotIndex,
-                        0, // Left click
+                        0,
                         ClickType.PICKUP,
                         player
                 );
+                // Item unstashed successfully
             }
-            stashedSlotIndex = -1; // Reset the stashed slot
+            stashedSlotIndex = -1;
         }
     }
     
@@ -79,6 +74,7 @@ public class CarriedItemUtil {
      * This should be called when the inventory context changes significantly (e.g., screen closes).
      */
     public static void reset() {
+        // Reset stashed item state
         stashedSlotIndex = -1;
     }
 

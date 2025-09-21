@@ -22,6 +22,10 @@ public class PlayerTab implements InventoryTab {
     
     private boolean active = false;
     
+    // Icon caching
+    private ItemStack cachedIcon = null;
+    private String cachedPlayerName = null;
+    
     public PlayerTab() {
         
     }
@@ -33,7 +37,16 @@ public class PlayerTab implements InventoryTab {
         if (player == null) {
             return ItemStack.EMPTY;
         }
-
+        
+        String currentName = player.getName().getString();
+        if (cachedIcon == null || !currentName.equals(cachedPlayerName)) {
+            cachedIcon = computeIcon(player);
+            cachedPlayerName = currentName;
+        }
+        return cachedIcon;
+    }
+    
+    private ItemStack computeIcon(LocalPlayer player) {
         ItemStack playerHead = new ItemStack(Items.PLAYER_HEAD);
         CompoundTag tag = playerHead.getOrCreateTag();
         GameProfile gameProfile = player.getGameProfile();

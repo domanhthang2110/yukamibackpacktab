@@ -2,7 +2,7 @@ package com.yukami.backpacktab;
 
 import com.mojang.logging.LogUtils;
 import com.yukami.backpacktab.client.config.TabConfig;
-import com.yukami.backpacktab.client.gui.InventoryTabManager;
+import com.yukami.backpacktab.client.gui.TabManager;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,8 +36,7 @@ public class YukamiBackpackTab {
     private void clientSetup(final FMLClientSetupEvent event) {
         // Client-side initialization
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            MinecraftForge.EVENT_BUS.register(InventoryTabManager.class);
-            LOGGER.info("Client setup for Yukami Backpack Tab - registered inventory tab manager");
+            MinecraftForge.EVENT_BUS.register(TabManager.class);
         });
     }
 }
