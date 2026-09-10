@@ -1,11 +1,10 @@
 package com.yukami.backpacktab.client.tabs;
 
-import com.yukami.backpacktab.client.util.CarriedItemUtil;
-
+import com.yukami.backpacktab.YukamiBackpackTab;
+import com.yukami.backpacktab.client.gui.TabManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -15,83 +14,121 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.IBackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
-public class BackpackTab implements InventoryTab {
-    
+import java.util.Optional;
+import java.util.UUID;
+
+public final class BackpackTab implements InventoryTab {
     private final ItemStack backpackStack;
-    private boolean active = false;
-    
-    public BackpackTab(ItemStack backpackStack) {
-        this.backpackStack = backpackStack;
+    private final String handlerName;
+    private final String identifier;
+    private final int slot;
+    private final Optional<UUID> contentsUuid;
+    private boolean active;
+    private Component cachedHoverText;
+
+    public BackpackTab(ItemStack backpackStack, String handlerName, String identifier, int slot) {
+        this.backpackStack = backpackStack.copy();
+        this.handlerName = handlerName;
+        this.identifier = identifier;
+        this.slot = slot;
+        this.contentsUuid = BackpackWrapper.fromStack(backpackStack).getContentsUuid();
     }
-    
+
+    public Optional<BackpackTab> resolveCurrentLocation(Player player) {
+        try {
+            BackpackTab[] match = {null};
+            boolean[] ambiguous = {false};
+
+            PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, handlerName, currentIdentifier, currentSlot) -> {
+                if ("main".equals(handlerName) || !matchesBackpack(backpack)) {
+                    return false;
+                }
+
+                if (match[0] != null) {
+                    ambiguous[0] = true;
+                } else if (handlerName.equals(this.handlerName)
+                        && currentIdentifier.equals(identifier)
+                        && currentSlot == slot) {
+                    match[0] = this;
+                } else {
+                    match[0] = new BackpackTab(backpack, handlerName, currentIdentifier, currentSlot);
+                }
+                return false;
+            });
+
+            return ambiguous[0] ? Optional.empty() : Optional.ofNullable(match[0]);
+        } catch (Exception e) {
+            YukamiBackpackTab.LOGGER.debug("Failed to refresh equipped backpack location", e);
+            return Optional.empty();
+        }
+    }
+
+    private boolean matchesBackpack(ItemStack candidate) {
+        Optional<UUID> candidateUuid = BackpackWrapper.fromStack(candidate).getContentsUuid();
+        if (contentsUuid.isPresent()) {
+            return contentsUuid.equals(candidateUuid);
+        }
+        return candidateUuid.isEmpty() && ItemStack.isSameItemSameComponents(backpackStack, candidate);
+    }
+
     @Override
     public ItemStack getTabIcon() {
         return backpackStack;
     }
-    
+
     @Override
     public Component getHoverText() {
-        return backpackStack.getHoverName();
+        if (cachedHoverText == null) {
+            cachedHoverText = backpackStack.getHoverName();
+        }
+        return cachedHoverText;
     }
-    
+
     @Override
     public void open(Player player, Level world, AbstractContainerMenu handler, MultiPlayerGameMode gameMode) {
-        if (player == null || gameMode == null || !(player instanceof LocalPlayer localPlayer)) return;
-        
+        if (player == null || gameMode == null) return;
+
         try {
-            // Stash carried item in inventory slot before operations
-            CarriedItemUtil.stashCarriedItem(localPlayer, gameMode, handler);
-            
-            PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
-                if (ItemStack.isSameItem(backpack, backpackStack)) {
-                    PacketDistributor.sendToServer(new BackpackOpenPayload(slot, identifier, inventoryName));
-                    return true; // Stop searching
-                }
-                return false; // Continue searching
-            });
+            PacketDistributor.sendToServer(new BackpackOpenPayload(slot, identifier, handlerName));
         } catch (Exception e) {
-            // Silently handle backpack opening errors
+            YukamiBackpackTab.LOGGER.debug("Failed to open equipped backpack tab", e);
         }
     }
-    
-    @Override
-    public void close(Player player, Level world, AbstractContainerMenu handler, MultiPlayerGameMode gameMode) {
-        // Backpack closing is handled by the server
-    }
-    
+
     @Override
     public boolean matchesCurrentScreen(AbstractContainerScreen<?> screen) {
         if (!(screen instanceof IBackpackScreen)) {
             return false;
         }
-        
-        // Check if we're in a block context - if so, this equipped backpack tab should NOT be active
-        // The block's ContainerTab should be active instead
-        BlockPos storedPos = com.yukami.backpacktab.client.gui.TabManager.getStoredBlockPos();
+
+        BlockPos storedPos = TabManager.getStoredBlockPos();
         if (storedPos != null) {
             Level world = Minecraft.getInstance().level;
             if (world != null) {
                 BlockState blockState = world.getBlockState(storedPos);
                 if (blockState.getBlock() instanceof BackpackBlock) {
-                    // We're viewing a backpack block, so this equipped backpack tab should NOT be active
-                    return false;
+                    Optional<UUID> screenUuid = TabManager.getScreenBackpackContentsUuid(screen);
+                    if (screenUuid.isEmpty()) {
+                        return false;
+                    }
+                    return !screenUuid.equals(TabManager.getBlockBackpackContentsUuid(storedPos));
                 }
             }
         }
-        
-        // No block context, so this equipped backpack tab should be active
+
         return true;
     }
-    
+
     @Override
     public boolean isActive() {
         return active;
     }
-    
+
     @Override
     public void setActive(boolean active) {
         this.active = active;

@@ -1,6 +1,6 @@
 package com.yukami.backpacktab.client.gui;
 
-import com.yukami.backpacktab.client.config.TabConfig;
+import com.yukami.backpacktab.config.TabConfig;
 import com.yukami.backpacktab.client.tabs.InventoryTab;
 
 import net.minecraft.client.Minecraft;
@@ -9,67 +9,47 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
-/**
- * Optimized TabRenderer for 1.21.1 - uses individual sprites like 1.21.8 with optimizations from 1.20.1
- */
-public class TabRenderer {
+public final class TabRenderer {
+    private TabRenderer() {}
 
-    private static final int TAB_WIDTH = 26;
-    private static final int TAB_HEIGHT = 32;
-    private static final int TAB_SPACING = 26;
     private static final int ITEM_OFFSET_X = 5;
     private static final int ITEM_OFFSET_Y = 8;
-    
-    private static final int TOP_TAB_BASE_OFFSET = 4;
-    private static final int TOP_ACTIVE_Y_ADJUST = 0;
-    private static final int TOP_INACTIVE_Y_ADJUST = 1;
-    private static final int TOP_INACTIVE_HEIGHT = 27;
-    
-    private static final int BOTTOM_TAB_BASE_OFFSET = -4;
-    private static final int BOTTOM_ACTIVE_Y_ADJUST = 0;
-    private static final int BOTTOM_INACTIVE_Y_ADJUST = 3;
-    private static final int BOTTOM_INACTIVE_HEIGHT = 29;
-    private static TabConfig.TabPosition cachedTabPosition = null;
-    
+    private static final int ICON_SIZE = 16;
+
+    private static TabConfig.TabPosition cachedTabPosition;
+
     private static TabConfig.TabPosition getTabPosition() {
         if (cachedTabPosition == null) {
             cachedTabPosition = TabConfig.getTabPosition();
         }
         return cachedTabPosition;
     }
-    
 
-    private static ResourceLocation getTabSprite(boolean active, boolean isFirstTab) {
-        TabConfig.TabPosition position = getTabPosition();
+    private static TabConfig.TabPosition resolveTabPosition(AbstractContainerScreen<?> screen) {
+        TabConfig.TabPosition override = TabConfig.getScreenPositionOverride(screen.getClass().getSimpleName());
+        return override != null ? override : getTabPosition();
+    }
+
+    private static ResourceLocation getTabSprite(TabConfig.TabPosition position, boolean active, boolean isFirstTab) {
         String state = active ? "selected" : "unselected";
         String tabNumber = isFirstTab ? (position.isRight() ? "7" : "1") : "2";
         String positionName = position.isBottom() ? "bottom" : "top";
         return ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_" + positionName + "_" + state + "_" + tabNumber);
     }
 
-    private static int getTabX(int tabIndex, TabConfig.TabPosition position, AbstractContainerScreen<?> screen) {
-        int screenWidth = screen.getXSize();
-        
-        return switch (position) {
-            case TOP_LEFT, BOTTOM_LEFT -> tabIndex * TAB_SPACING;
-            case TOP_RIGHT, BOTTOM_RIGHT -> screenWidth - TAB_WIDTH - (tabIndex * TAB_SPACING);
-        };
+    private static TabConfig.ScreenOffset getScreenOffset(AbstractContainerScreen<?> screen, TabConfig.TabPosition position) {
+        String screenClassName = screen.getClass().getSimpleName();
+        return TabConfig.getScreenOffset(screenClassName, position);
     }
-    
-    private static int getTabY(TabConfig.TabPosition position, AbstractContainerScreen<?> screen, boolean active) {
-        int screenHeight = screen.getYSize();
-        
-        return switch (position) {
-            case TOP_LEFT, TOP_RIGHT -> 
-                -TAB_HEIGHT + TOP_TAB_BASE_OFFSET + (active ? TOP_ACTIVE_Y_ADJUST : TOP_INACTIVE_Y_ADJUST);
-            case BOTTOM_LEFT, BOTTOM_RIGHT -> 
-                screenHeight + BOTTOM_TAB_BASE_OFFSET + (active ? BOTTOM_ACTIVE_Y_ADJUST : BOTTOM_INACTIVE_Y_ADJUST);
-        };
-    }
-    
-    private static int getTabHeight(TabConfig.TabPosition position, boolean active) {
-        if (active) return TAB_HEIGHT;
-        return position.isBottom() ? BOTTOM_INACTIVE_HEIGHT : TOP_INACTIVE_HEIGHT;
+
+    public static TabBounds getTabBounds(
+            int tabIndex,
+            TabConfig.TabPosition position,
+            AbstractContainerScreen<?> screen,
+            TabConfig.ScreenOffset offset,
+            boolean active
+    ) {
+        return TabBounds.at(tabIndex, position, screen.getXSize(), screen.getYSize(), offset, active);
     }
 
     public static void invalidateCache() {
@@ -77,73 +57,91 @@ public class TabRenderer {
     }
 
     public static void renderTabs(GuiGraphics guiGraphics, AbstractContainerScreen<?> screen, int mouseX, int mouseY) {
-        var tabs = TabManager.getActiveTabs();
+        if (TabOffsetEditor.isEnabledFor(screen)) {
+            TabOffsetEditor.render(guiGraphics, screen, mouseX, mouseY);
+            return;
+        }
+
+        var tabs = TabManager.getActiveTabsView();
         if (tabs.isEmpty()) return;
-        
-        TabConfig.TabPosition position = getTabPosition();
-        
-        // Convert mouse coordinates to screen-relative for tooltip detection
+
+        TabConfig.TabPosition position = resolveTabPosition(screen);
+        renderTabsAtPosition(guiGraphics, screen, mouseX, mouseY, position, getScreenOffset(screen, position), false);
+    }
+
+    static void renderTabsAtPosition(
+            GuiGraphics guiGraphics,
+            AbstractContainerScreen<?> screen,
+            int mouseX,
+            int mouseY,
+            TabConfig.TabPosition position,
+            TabConfig.ScreenOffset offset,
+            boolean selectedPreview
+    ) {
+        var tabs = TabManager.getActiveTabsView();
+        if (tabs.isEmpty()) return;
+
         int localMouseX = mouseX - screen.getGuiLeft();
         int localMouseY = mouseY - screen.getGuiTop();
-        
+
         for (int i = 0; i < tabs.size(); i++) {
             InventoryTab tab = tabs.get(i);
             boolean active = tab.isActive();
-            
-            int x = getTabX(i, position, screen);
-            int y = getTabY(position, screen, active);
-            int height = getTabHeight(position, active);
-            
-            ResourceLocation sprite = getTabSprite(active, i == 0);
-            guiGraphics.blitSprite(sprite, x, y, TAB_WIDTH, height);
-            
-            int itemX = x + ITEM_OFFSET_X;
-            int itemY = y + ITEM_OFFSET_Y;
-            if (!active && position.isBottom()) {
-                itemY -= 2;
-            } else if (!active && !position.isBottom()) {
-                itemY -= 1;
+
+            TabBounds bounds = getTabBounds(i, position, screen, offset, active);
+            int x = bounds.x();
+            int y = bounds.y();
+            int height = bounds.height();
+
+            ResourceLocation sprite = getTabSprite(position, active, i == 0);
+            boolean dimmedPreview = !selectedPreview && TabOffsetEditor.isEnabledFor(screen);
+            if (dimmedPreview) {
+                guiGraphics.setColor(0.45F, 0.45F, 0.45F, 0.65F);
             }
+            guiGraphics.blitSprite(sprite, x, y, bounds.width(), height);
+
+            int itemX = x + ITEM_OFFSET_X;
+            int itemY = position.isBottom()
+                    ? (y + height) - ITEM_OFFSET_Y - ICON_SIZE
+                    : y + ITEM_OFFSET_Y;
             guiGraphics.renderItem(tab.getTabIcon(), itemX, itemY);
-            
-            // Tooltip
-            if (localMouseX >= x && localMouseX < x + TAB_WIDTH && localMouseY >= y && localMouseY < y + height) {
-                guiGraphics.renderTooltip(Minecraft.getInstance().font, tab.getHoverText(), mouseX, mouseY);
+            if (dimmedPreview) {
+                guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+            }
+
+            if (!TabOffsetEditor.isEnabledFor(screen) &&
+                    bounds.contains(localMouseX, localMouseY)) {
+                guiGraphics.renderTooltip(Minecraft.getInstance().font, tab.getHoverText(), localMouseX, localMouseY);
             }
         }
     }
 
-
     public static boolean handleTabClick(double mouseX, double mouseY, int button, AbstractContainerScreen<?> screen) {
-        if (button != 0) return false;
-        
+        if (TabOffsetEditor.isEnabled()) return false;
+
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
         if (player == null) return false;
 
-        var tabs = TabManager.getActiveTabs();
+        var tabs = TabManager.getActiveTabsView();
         if (tabs.isEmpty()) return false;
-        
-        TabConfig.TabPosition position = getTabPosition();
-        
-        // Convert mouse coordinates to screen-relative for click detection
+
+        TabConfig.TabPosition position = resolveTabPosition(screen);
+
+        TabConfig.ScreenOffset offset = getScreenOffset(screen, position);
+
         double localMouseX = mouseX - screen.getGuiLeft();
         double localMouseY = mouseY - screen.getGuiTop();
-        
+
         for (int i = 0; i < tabs.size(); i++) {
             InventoryTab tab = tabs.get(i);
             boolean active = tab.isActive();
-            
-            // Get position using the 2 functions
-            int x = getTabX(i, position, screen);
-            int y = getTabY(position, screen, active);
-            int height = getTabHeight(position, active);
-            
-            if (localMouseX >= x && localMouseX < x + TAB_WIDTH && 
-                localMouseY >= y && localMouseY < y + height) {
-                
-                tabs.forEach(t -> t.setActive(t == tab));
-                TabSwitcher.switchToTab(tab, player, minecraft.gameMode);
+
+            TabBounds bounds = getTabBounds(i, position, screen, offset, active);
+            if (bounds.contains(localMouseX, localMouseY)) {
+                if (button == 0 && !active && !tab.matchesCurrentScreen(screen)) {
+                    TabSwitcher.switchToTab(tab, player, minecraft.gameMode);
+                }
                 return true;
             }
         }
