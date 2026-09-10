@@ -27,8 +27,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import com.yukami.backpacktab.YukamiBackpackTab;
@@ -48,6 +50,7 @@ public final class TabManager {
     private static Block storedBlockType;
     private static final TabSwitchState tabSwitch = new TabSwitchState();
     private static final List<InventoryTab> activeTabs = new ArrayList<>();
+    private static final Set<Integer> consumedMouseButtons = new HashSet<>();
 
     static boolean beginTabSwitch(InventoryTab target, AbstractContainerMenu menu) {
         return tabSwitch.tryBegin(target.isActive(), menu, System.nanoTime());
@@ -233,6 +236,7 @@ public final class TabManager {
         currentScreen = null;
         tabSwitch.reset();
         activeTabs.clear();
+        consumedMouseButtons.clear();
         CarriedItemUtil.reset();
         TabRenderer.invalidateCache();
     }
@@ -338,13 +342,17 @@ public final class TabManager {
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre event) {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)) return;
 
+        consumedMouseButtons.remove(event.getButton());
+
         if (tabSwitch.isPending()) {
+            consumedMouseButtons.add(event.getButton());
             event.setCanceled(true);
             return;
         }
 
         if (TabOffsetEditor.isEnabledFor(containerScreen)) {
             TabOffsetEditor.handleMousePressed(containerScreen, event.getMouseX(), event.getMouseY(), event.getButton());
+            consumedMouseButtons.add(event.getButton());
             event.setCanceled(true);
             return;
         }
@@ -360,6 +368,7 @@ public final class TabManager {
         }
 
         if (TabRenderer.handleTabClick(event.getMouseX(), event.getMouseY(), event.getButton(), containerScreen)) {
+            consumedMouseButtons.add(event.getButton());
             event.setCanceled(true);
         }
     }
@@ -394,6 +403,11 @@ public final class TabManager {
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre event) {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)) return;
+
+        if (consumedMouseButtons.remove(event.getButton())) {
+            event.setCanceled(true);
+            return;
+        }
 
         if (tabSwitch.isPending()) {
             event.setCanceled(true);

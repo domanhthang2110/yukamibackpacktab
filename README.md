@@ -32,7 +32,7 @@ Global settings are in `config/yukamibackpacktab-client.toml`. Screen offsets an
 
 On Linux/macOS use `./gradlew`.
 
-Build output: `build/libs/yukamibackpacktab-1.21.1-2.1.0-neoforge.jar`.
+Build output: `build/libs/yukamibackpacktab-1.21.1-2.1.1-neoforge.jar`.
 
 ## License
 
