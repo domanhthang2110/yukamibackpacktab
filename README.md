@@ -1,91 +1,63 @@
-# Yukami Sophisticated Backpack Tab
+# Yukami's Sophisticated Backpack Tab — Minecraft 26.1.2
 
-A Minecraft Forge mod that enhances inventory management by providing dedicated tabs for Sophisticated Backpacks and other container blocks. This mod streamlines access to your carried storage and placed containers, making your adventuring and building experience more efficient.
-
-## Features
-
-- **Backpack Tabs**: Easily access your equipped Sophisticated Backpacks directly from your inventory screen via dedicated tabs
-- **Container Block Tabs**: Quick access to placed backpack blocks and other containers
-- **Configurable Tab Position**: Choose where tabs appear on your inventory screen
-- **Custom Block Support**: Configure additional blocks to have tab functionality as a backup for blocks that can't pass through GUI checks
-- **Smart Tab Management**: Intelligent tab switching with proper item handling to prevent duplication or loss
+A NeoForge client mod that adds tabs for switching between an equipped Sophisticated Backpack and your inventory or the container you opened.
 
 ## Requirements
 
-- **Minecraft**: 1.20.1
-- **Minecraft Forge**: 47.4.0 or later
-- **Dependencies**:
-  - [Sophisticated Backpacks](https://www.curseforge.com/minecraft/mc-mods/sophisticated-backpacks)
-  - [Sophisticated Core](https://www.curseforge.com/minecraft/mc-mods/sophisticated-core)
+- Minecraft **26.1.2** and Java **25**
+- NeoForge **26.1.2.99** or newer within the 26.1.2 series
+- Sophisticated Backpacks **3.25.90** or newer for 26.1.2
+- Sophisticated Core **1.4.104** or newer for 26.1.2
 
-## Installation
+Use dependency files built for Minecraft 26.1.2. Files for 1.21.1, 26.1, or 26.2 are not interchangeable.
 
-1. **Install Minecraft Forge**: Ensure you have Minecraft Forge 47.4.0 or later installed
-2. **Install Dependencies**: Download and install Sophisticated Backpacks and Sophisticated Core
-3. **Download the Mod**: Get the latest version of Yukami Sophisticated Backpack Tab
-4. **Install**: Place the downloaded `.jar` file into your Minecraft `mods` folder
-5. **Launch**: Start Minecraft with the Forge profile
+## Installation and usage
 
-## Usage
+Install NeoForge and the two required Sophisticated mods, then place this mod's JAR in your instance's `mods` folder.
 
-### Basic Functionality
+This is a client-only mod and does not need to be installed on the server. When switching with an item on the cursor, the client first tries to move it into a free inventory slot. If no empty slot is available, closing the old menu follows vanilla behavior: Minecraft merges the stack into compatible inventory stacks when possible and drops any remainder that cannot fit.
 
-Once installed, tabs will automatically appear when you open your inventory if you have:
-- **Equipped backpacks** in your inventory slots
-- **Placed backpack blocks** that you've recently interacted with
-- **Other supported container blocks** (chests, furnaces, etc.)
+Equip a backpack and open your inventory or a supported container. Click a tab to switch screens.
 
-Click on any tab to quickly switch between different containers without closing and reopening GUIs.
+Clicking the tab for the screen that is already open is a no-op, including while carrying an item.
 
-## Building from Source
+Press **F9** in an inventory screen to open the offset editor:
 
-If you want to build the mod from source:
+- Set a global corner or override it for the current screen.
+- Select and drag a tab preview, or move it with the arrow keys (Shift moves 5 pixels).
+- Reset clears the selected corner's offset. Save applies edits; Cancel or Escape discards them.
+- Both bottom corners use `(0, 0)` as the normal baseline. Version 1 offset files migrate once without moving explicitly saved positions.
 
-1. **Clone the Repository**:
-   ```bash
-   git clone <repository-url>
-   cd yukamibackpacktab
-   ```
+Global settings are in `config/yukamibackpacktab-client.toml`. Screen offsets and corner overrides are in `config/yukamibackpacktab/screen_offsets.json`.
 
-2. **Set up Development Environment**:
-   ```bash
-   ./gradlew genEclipseRuns  # For Eclipse
-   ./gradlew genIdeaRuns     # For IntelliJ IDEA
-   ```
+## Development
 
-3. **Build the Mod**:
-   ```bash
-   ./gradlew build
-   ```
+This folder is an independent port of the 1.21.1 project. Generated caches and development worlds were not copied.
 
-The compiled `.jar` file will be in the `build/libs/` directory.
+```powershell
+.\gradlew.bat build
+.\gradlew.bat runClient
+```
 
-## Troubleshooting
+On Linux/macOS use `./gradlew`. The wrapper uses Gradle 9.1.0, and the Foojay resolver can provision a Java 25 toolchain if needed. The first build downloads Minecraft and its development dependencies.
 
-### Tabs Not Appearing
-- Ensure you have Sophisticated Backpacks and Sophisticated Core installed
-- Check that you're carrying a backpack or have interacted with a supported container
-- Verify your configuration file syntax if using custom blocks
+Build output: `build/libs/yukamibackpacktab-26.1.2-2.1.0-neoforge.jar`.
 
-### Items Disappearing
-- The mod includes safeguards to prevent item loss during tab switching, if this problem persists, please issue a bug report
+VS Code tasks are available for building and running the client. The launch configuration starts Gradle with `--debug-jvm` and attaches on localhost port 5005; stop the Gradle debug task when finished.
 
-### Custom Blocks Not Working
-- Ensure the block ID format is correct: `modid:blockname`
-- Check that the mod containing the block is loaded
-- Verify the block name matches exactly
+The development client also includes **Just Dire Things 1.6.11** and **Configured 2.7.5**. These are test conveniences, not required dependencies of the distributed mod. Sophisticated dependencies are not bundled into the output JAR.
+
+## Port notes
+
+The port uses the 26.1.2 GUI extraction API, explicit ARGB text colors, foreground rendering in window coordinates, deferred tooltips, GUI strata for editor layering, and the current keyboard and container-input APIs. The panel layout, tab-switch state machine, and offset migration are retained.
+
+## Verification (2026-09-10)
+
+- Offline build passed with all 24 unit tests and no compiler warnings.
+- The development client loaded this mod and all four development dependencies, initialized rendering, and reached the main menu.
+- Configured logs a provider-loading error but successfully registers this mod's config screen factory. The test mods also emit model/texture warnings; these did not prevent startup.
+- In-world interaction and visual checks remain: inventory/backpack/container switching (including a carried stack), all four corners, F9 editor controls, resizing, Save/Cancel, and closing during a switch. Startup testing alone does not verify these behaviors.
 
 ## License
 
-This project is licensed under the LGPL-3.0-or-later License.
-
-## Credits
-
-- **Author**: Yukami
-- **Dependencies**: Sophisticated Backpacks, Sophisticated Core
-- **Minecraft Version**: 1.20.1
-- **Forge Version**: 47.4.0+
-
-## Contributing
-
-Contributions are welcome! Please ensure any pull requests maintain compatibility with the existing codebase and follow the established code style.
+GPL-3.0-only. See `LICENSE.txt`.

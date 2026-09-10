@@ -22,3 +22,17 @@ description='''${mod_description}'''
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="sophisticatedbackpacks"
+    type="required"
+    versionRange="[3.25.90,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="sophisticatedcore"
+    type="required"
+    versionRange="[1.4.104,)"
+    ordering="AFTER"
+    side="BOTH"

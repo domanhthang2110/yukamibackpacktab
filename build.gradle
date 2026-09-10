@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.107'
+    id 'net.neoforged.moddev' version '2.0.144'
     id 'idea'
 }
 
@@ -18,8 +18,9 @@ version = "${minecraft_version}-${mod_version}"
 group = mod_group_id
 
 repositories {
+    mavenCentral()
     maven {
-        url "https://cursemaven.com"
+        url = "https://cursemaven.com"
     }
     // Add here additional repositories if required by some of the dependencies below.
 }
@@ -33,17 +34,12 @@ tasks.named("jar") {
     archiveClassifier.set("neoforge")
 }
 
-// Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Minecraft 26.1.2 requires Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
-
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
 
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
@@ -120,14 +116,18 @@ configurations {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.13.2'
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
     // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
     // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
     // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
-    implementation "curse.maven:sophisticated-backpacks-422301:6989591"
-    implementation "curse.maven:sophisticated-core-618298:6982394"
+    // Minecraft 26.1.2: Backpacks 3.25.90.2106 and Core 1.4.104.2314.
+    implementation "curse.maven:sophisticated-backpacks-422301:8687818"
+    implementation "curse.maven:sophisticated-core-618298:8705495"
+    localRuntime "curse.maven:just-dire-things-1002348:8251776"
+    localRuntime "curse.maven:configured-457570:7943180"
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
     // The group id is ignored when searching -- in this case, it is "blank"
@@ -176,13 +176,18 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = "file://${project.projectDir}/repo"
         }
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.compilerArgs.add('-Xlint:deprecation')
+}
+
+tasks.withType(Test).configureEach {
+    useJUnit()
 }
 
 // IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.

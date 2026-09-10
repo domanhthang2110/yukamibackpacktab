@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build mod",
+      "type": "shell",
+      "command": "./gradlew",
+      "windows": { "command": ".\\gradlew.bat" },
+      "args": ["build"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$javac"]
+    },
+    {
+      "label": "Run Minecraft client",
+      "type": "shell",
+      "command": "./gradlew",
+      "windows": { "command": ".\\gradlew.bat" },
+      "args": ["runClient"],
+      "problemMatcher": ["$javac"]
+    },
+    {
+      "label": "Debug Minecraft client",
+      "type": "shell",
+      "command": "./gradlew",
+      "windows": { "command": ".\\gradlew.bat" },
+      "args": ["runClient", "--debug-jvm", "--console=plain"],
+      "isBackground": true,
+      "problemMatcher": [{
+        "base": "$javac",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Listening for transport dt_socket at address: 5005"
+        }
+      }]
+    }
+  ]
+}
