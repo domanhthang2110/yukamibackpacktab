@@ -41,7 +41,7 @@ This folder is an independent port of the 1.21.1 project. Generated caches and d
 
 On Linux/macOS use `./gradlew`. The wrapper uses Gradle 9.1.0, and the Foojay resolver can provision a Java 25 toolchain if needed. The first build downloads Minecraft and its development dependencies.
 
-Build output: `build/libs/yukamibackpacktab-26.1.2-2.1.0-neoforge.jar`.
+Build output: `build/libs/yukamibackpacktab-26.1.2-2.1.1-neoforge.jar`.
 
 VS Code tasks are available for building and running the client. The launch configuration starts Gradle with `--debug-jvm` and attaches on localhost port 5005; stop the Gradle debug task when finished.
 
