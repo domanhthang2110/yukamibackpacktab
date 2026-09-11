@@ -41,8 +41,10 @@ public final class PlayerTab implements InventoryTab {
         ItemStack playerHead = new ItemStack(Items.PLAYER_HEAD);
         GameProfile gameProfile = player.getGameProfile();
 
-        if (gameProfile.getId() != null) {
-            ResolvableProfile profile = new ResolvableProfile(gameProfile);
+        if (gameProfile.id() != null) {
+            ResolvableProfile profile = gameProfile.properties().containsKey("textures")
+                    ? ResolvableProfile.createResolved(gameProfile)
+                    : ResolvableProfile.createUnresolved(gameProfile.id());
             playerHead.set(DataComponents.PROFILE, profile);
         }
         return playerHead;
@@ -64,7 +66,7 @@ public final class PlayerTab implements InventoryTab {
 
         if (gameMode.getPlayerMode() == GameType.SURVIVAL || gameMode.getPlayerMode() == GameType.ADVENTURE) {
             localPlayer.containerMenu = localPlayer.inventoryMenu;
-            Minecraft.getInstance().setScreen(new InventoryScreen(localPlayer));
+            Minecraft.getInstance().gui.setScreen(new InventoryScreen(localPlayer));
         }
     }
 

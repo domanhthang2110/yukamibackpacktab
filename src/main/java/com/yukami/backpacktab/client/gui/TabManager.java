@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.client.event.ContainerScreenEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
@@ -44,7 +43,6 @@ import com.yukami.backpacktab.config.TabConfig;
 @EventBusSubscriber(modid = "yukamibackpacktab", value = Dist.CLIENT)
 public final class TabManager {
     private TabManager() {}
-
     private static AbstractContainerScreen<?> currentScreen;
     private static BlockPos storedBlockPos;
     private static Block storedBlockType;
@@ -169,7 +167,7 @@ public final class TabManager {
             return false;
         }
 
-        return player.canInteractWithBlock(storedBlockPos, 1.0);
+        return player.isWithinBlockInteractionRange(storedBlockPos, 1.0);
     }
 
     private static boolean isContainerBlock(Level world, BlockPos pos) {
@@ -304,8 +302,8 @@ public final class TabManager {
     }
 
     @SubscribeEvent
-    public static void onScreenRender(ContainerScreenEvent.Render.Foreground event) {
-        if (!(event.getContainerScreen() instanceof AbstractContainerScreen<?> containerScreen)) return;
+    public static void onScreenRender(ScreenEvent.Render.Foreground event) {
+        if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)) return;
 
         if (TabOffsetEditor.isEnabledFor(containerScreen)) {
             TabRenderer.renderTabs(event.getGuiGraphics(), containerScreen, event.getMouseX(), event.getMouseY());
@@ -332,7 +330,7 @@ public final class TabManager {
 
     @SubscribeEvent
     public static void onTooltip(RenderTooltipEvent.Pre event) {
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen &&
+        if (Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> screen &&
                 TabOffsetEditor.isEnabledFor(screen)) {
             event.setCanceled(true);
         }
@@ -380,7 +378,7 @@ public final class TabManager {
         Minecraft minecraft = Minecraft.getInstance();
 
         if (event.getKeyCode() != org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE &&
-                !minecraft.options.keyInventory.matches(event.getKeyCode(), event.getScanCode())) {
+                !minecraft.options.keyInventory.matches(event.getKeyEvent())) {
             event.setCanceled(true);
         }
     }
@@ -439,7 +437,7 @@ public final class TabManager {
         if (!tabSwitch.isPending()) return;
 
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null || !(minecraft.screen instanceof AbstractContainerScreen<?>)) {
+        if (minecraft.player == null || !(minecraft.gui.screen() instanceof AbstractContainerScreen<?>)) {
             resetState();
         } else if (tabSwitch.hasTimedOut(System.nanoTime())) {
             resetState();

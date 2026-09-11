@@ -19,7 +19,7 @@ public final class TabSwitcher {
     public static void switchToTab(InventoryTab targetTab, Player player, MultiPlayerGameMode gameMode) {
         if (!(player instanceof LocalPlayer localPlayer) || gameMode == null) return;
 
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen
+        if (Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> screen
                 && targetTab.matchesCurrentScreen(screen)) return;
 
         if (targetTab instanceof BackpackTab backpackTab) {
@@ -53,7 +53,7 @@ public final class TabSwitcher {
             return;
         }
 
-        int excludedSlot = preserveMainHand ? localPlayer.getInventory().selected : -1;
+        int excludedSlot = preserveMainHand ? localPlayer.getInventory().getSelectedSlot() : -1;
         CarriedItemUtil.stashCarriedItem(localPlayer, gameMode, containerMenu, excludedSlot);
 
         if (!(containerMenu instanceof InventoryMenu) && localPlayer.connection != null) {

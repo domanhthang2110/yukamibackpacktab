@@ -5,9 +5,10 @@ import com.yukami.backpacktab.client.gui.util.EditorGui;
 import com.yukami.backpacktab.client.gui.util.ResponsivePanel;
 import com.yukami.backpacktab.config.TabConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
@@ -56,9 +57,9 @@ public final class TabOffsetEditor {
     private static final int PANEL_HEIGHT = 164;
     private static final int STACKED_PANEL_HEIGHT = 188;
 
-    private static final int COLOR_TITLE = 0xFFFFFF;
-    private static final int COLOR_VALUE = 0xFFFF55;
-    private static final int COLOR_CAPTION = 0x55FFFF;
+    private static final int COLOR_TITLE = 0xFFFFFFFF;
+    private static final int COLOR_VALUE = 0xFFFFFF55;
+    private static final int COLOR_CAPTION = 0xFF55FFFF;
     private static final Map<TabConfig.TabPosition, TabConfig.ScreenOffset> pendingOffsets =
             new EnumMap<>(TabConfig.TabPosition.class);
 
@@ -112,12 +113,13 @@ public final class TabOffsetEditor {
         pendingOffsets.clear();
     }
 
-    public static boolean handleKeyPressed(int keyCode) {
+    public static boolean handleKeyPressed(KeyEvent event) {
         if (!enabled) {
             return false;
         }
 
-        switch (keyCode) {
+        int step = event.hasShiftDown() ? 5 : 1;
+        switch (event.key()) {
             case GLFW.GLFW_KEY_TAB -> {
                 cyclePosition();
                 return true;
@@ -135,19 +137,19 @@ public final class TabOffsetEditor {
                 return true;
             }
             case GLFW.GLFW_KEY_UP -> {
-                moveSelected(0, -stepSize());
+                moveSelected(0, -step);
                 return true;
             }
             case GLFW.GLFW_KEY_DOWN -> {
-                moveSelected(0, stepSize());
+                moveSelected(0, step);
                 return true;
             }
             case GLFW.GLFW_KEY_LEFT -> {
-                moveSelected(-stepSize(), 0);
+                moveSelected(-step, 0);
                 return true;
             }
             case GLFW.GLFW_KEY_RIGHT -> {
-                moveSelected(stepSize(), 0);
+                moveSelected(step, 0);
                 return true;
             }
             default -> {
@@ -165,8 +167,8 @@ public final class TabOffsetEditor {
             return false;
         }
 
-        double localMouseX = mouseX - screen.getGuiLeft();
-        double localMouseY = mouseY - screen.getGuiTop();
+        double localMouseX = mouseX - screen.getLeftPos();
+        double localMouseY = mouseY - screen.getTopPos();
 
         if (screenPositionDropdown.isOpen()) {
             screenPositionDropdown.handleMousePressed(localMouseX, localMouseY);
@@ -226,7 +228,7 @@ public final class TabOffsetEditor {
         return true;
     }
 
-    public static void render(GuiGraphics guiGraphics, AbstractContainerScreen<?> screen, int mouseX, int mouseY) {
+    public static void render(GuiGraphicsExtractor guiGraphics, AbstractContainerScreen<?> screen, int mouseX, int mouseY) {
         for (TabConfig.TabPosition position : TabConfig.TabPosition.values()) {
             TabRenderer.renderTabsAtPosition(
                     guiGraphics,
@@ -255,19 +257,18 @@ public final class TabOffsetEditor {
         int valuesY = 106 + extraRow * 2;
         int resetY = 122 + extraRow * 2;
         int actionsY = resetY + 14 + 4;
-        int panelX = layout.x() - screen.getGuiLeft();
-        int panelY = layout.y() - screen.getGuiTop();
+        int panelX = layout.x() - screen.getLeftPos();
+        int panelY = layout.y() - screen.getTopPos();
         int innerX = panelX + 6;
         int innerWidth = layout.width() - 12;
         int fieldX = innerX + (stacked ? 0 : labelWidth);
         int fieldWidth = innerWidth - (stacked ? 0 : labelWidth);
-        double localMouseX = mouseX - screen.getGuiLeft();
-        double localMouseY = mouseY - screen.getGuiTop();
+        double localMouseX = mouseX - screen.getLeftPos();
+        double localMouseY = mouseY - screen.getTopPos();
 
         editorGui.clearButtons();
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 300);
+        guiGraphics.nextStratum();
         editorGui.panel(guiGraphics, panelX, panelY, layout.width(), layout.height());
         editorGui.label(guiGraphics, fitLabel(screenClassName, innerWidth), innerX, panelY + 6, COLOR_TITLE);
         editorGui.sectionHeader(guiGraphics, "Position", innerX, panelY + 24, innerWidth, COLOR_CAPTION);
@@ -289,16 +290,15 @@ public final class TabOffsetEditor {
         editorGui.button(guiGraphics, "Cancel", innerX + halfWidth + 4, panelY + actionsY,
                 innerWidth - halfWidth - 4, 16, localMouseX, localMouseY, TabOffsetEditor::cancel);
 
-        int maxVisibleY = screen.height - screen.getGuiTop();
+        int maxVisibleY = screen.height - screen.getTopPos();
         screenPositionDropdown.renderHeader(guiGraphics, minecraft.font, fieldX, panelY + screenFieldY, fieldWidth,
                 DROPDOWN_HEADER_HEIGHT, DROPDOWN_OPTION_HEIGHT, localMouseX, localMouseY, maxVisibleY);
         globalPositionDropdown.renderHeader(guiGraphics, minecraft.font, fieldX, panelY + globalFieldY, fieldWidth,
                 DROPDOWN_HEADER_HEIGHT, DROPDOWN_OPTION_HEIGHT, localMouseX, localMouseY, maxVisibleY);
 
-        guiGraphics.pose().translate(0, 0, 10);
+        guiGraphics.nextStratum();
         screenPositionDropdown.renderPopup(guiGraphics, minecraft.font, localMouseX, localMouseY);
         globalPositionDropdown.renderPopup(guiGraphics, minecraft.font, localMouseX, localMouseY);
-        guiGraphics.pose().popPose();
     }
 
     private static int minimumPanelWidth() {
@@ -337,10 +337,6 @@ public final class TabOffsetEditor {
         selectedPosition = positions[(selectedPosition.ordinal() + 1) % positions.length];
     }
 
-    private static int stepSize() {
-        return Screen.hasShiftDown() ? 5 : 1;
-    }
-
     private static void moveSelected(int dx, int dy) {
         TabConfig.ScreenOffset current = getOffset(selectedPosition);
         pendingOffsets.put(selectedPosition, new TabConfig.ScreenOffset(current.x + dx, current.y + dy));
@@ -351,8 +347,8 @@ public final class TabOffsetEditor {
     }
 
     private static TabConfig.TabPosition getHoveredPosition(AbstractContainerScreen<?> screen, double mouseX, double mouseY) {
-        double localMouseX = mouseX - screen.getGuiLeft();
-        double localMouseY = mouseY - screen.getGuiTop();
+        double localMouseX = mouseX - screen.getLeftPos();
+        double localMouseY = mouseY - screen.getTopPos();
 
         var tabs = TabManager.getActiveTabsView();
         for (TabConfig.TabPosition position : TabConfig.TabPosition.values()) {

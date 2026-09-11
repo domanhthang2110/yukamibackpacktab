@@ -14,7 +14,6 @@ import java.util.Map;
 
 public final class TabConfig {
     private TabConfig() {}
-
     public enum TabPosition {
         TOP_LEFT,
         TOP_RIGHT,

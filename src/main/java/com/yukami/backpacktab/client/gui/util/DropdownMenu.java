@@ -1,7 +1,7 @@
 package com.yukami.backpacktab.client.gui.util;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +14,8 @@ public final class DropdownMenu<T> {
     private static final int ARROW_SIZE = 3;
     private static final int TOP_HIGHLIGHT = 0x55FFFFFF;
     private static final int POPUP_BACKGROUND = 0xE0101010;
-    private static final int TEXT_COLOR = 0xFFFFFF;
-    private static final int SELECTED_TEXT_COLOR = 0x55FFFF;
+    private static final int TEXT_COLOR = 0xFFFFFFFF;
+    private static final int SELECTED_TEXT_COLOR = 0xFF55FFFF;
     private static final int LABEL_CLIP_WIDTH = 18;
 
     private final List<T> options;
@@ -62,7 +62,7 @@ public final class DropdownMenu<T> {
     }
 
     public void renderHeader(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             Font font,
             int x,
             int y,
@@ -81,7 +81,7 @@ public final class DropdownMenu<T> {
         guiGraphics.fill(x, y, x + width, y + 1, TOP_HIGHLIGHT);
 
         String label = font.plainSubstrByWidth(labeler.apply(getSelected()), width - LABEL_CLIP_WIDTH);
-        guiGraphics.drawString(font, label, x + TEXT_PADDING_X, y + (headerHeight - 8) / 2, TEXT_COLOR, false);
+        guiGraphics.text(font, label, x + TEXT_PADDING_X, y + (headerHeight - 8) / 2, TEXT_COLOR, false);
 
         int arrowX = x + width - LABEL_CLIP_WIDTH / 2;
         int arrowY = y + (headerHeight - ARROW_SIZE) / 2;
@@ -103,7 +103,7 @@ public final class DropdownMenu<T> {
         opensUpward = !downFits && y >= popupHeight;
     }
 
-    public void renderPopup(GuiGraphics guiGraphics, Font font, double mouseX, double mouseY) {
+    public void renderPopup(GuiGraphicsExtractor guiGraphics, Font font, double mouseX, double mouseY) {
         if (!open || width <= 0) {
             return;
         }
@@ -114,7 +114,7 @@ public final class DropdownMenu<T> {
         return options.size() * optionHeight + 2;
     }
 
-    private void renderPopupList(GuiGraphics guiGraphics, Font font, double mouseX, double mouseY) {
+    private void renderPopupList(GuiGraphicsExtractor guiGraphics, Font font, double mouseX, double mouseY) {
         int popupHeight = getPopupHeight();
         int popupTop = opensUpward ? y - popupHeight : y + headerHeight;
 
@@ -129,7 +129,7 @@ public final class DropdownMenu<T> {
 
             String label = font.plainSubstrByWidth(labeler.apply(options.get(i)), width - LABEL_CLIP_WIDTH);
             int color = i == selectedIndex ? SELECTED_TEXT_COLOR : TEXT_COLOR;
-            guiGraphics.drawString(font, label, x + TEXT_PADDING_X,
+            guiGraphics.text(font, label, x + TEXT_PADDING_X,
                     optionY + (optionHeight - 8) / 2, color, false);
         }
     }

@@ -13,25 +13,24 @@ import com.yukami.backpacktab.client.gui.TabOffsetEditor;
 @EventBusSubscriber(modid = "yukamibackpacktab", value = Dist.CLIENT)
 public final class KeyInputHandler {
     private KeyInputHandler() {}
-
     @SubscribeEvent
     public static void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
 
-        if (player == null || minecraft.screen == null) {
+        if (player == null || minecraft.gui.screen() == null) {
             return;
         }
 
-        if (TabOffsetEditor.handleKeyPressed(event.getKeyCode())) {
+        if (TabOffsetEditor.handleKeyPressed(event.getKeyEvent())) {
             event.setCanceled(true);
             return;
         }
 
         if (KeyBindings.toggleOffsetEditorKey != null &&
-            event.getKeyCode() == KeyBindings.toggleOffsetEditorKey.getKey().getValue() &&
-            minecraft.screen instanceof AbstractContainerScreen<?>) {
-            TabOffsetEditor.toggle(minecraft.screen);
+            KeyBindings.toggleOffsetEditorKey.matches(event.getKeyEvent()) &&
+            minecraft.gui.screen() instanceof AbstractContainerScreen<?>) {
+            TabOffsetEditor.toggle(minecraft.gui.screen());
             event.setCanceled(true);
         }
     }

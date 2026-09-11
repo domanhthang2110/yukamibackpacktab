@@ -12,7 +12,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.IBackpackScreen;
@@ -94,7 +94,7 @@ public final class BackpackTab implements InventoryTab {
         if (player == null || gameMode == null) return;
 
         try {
-            PacketDistributor.sendToServer(new BackpackOpenPayload(slot, identifier, handlerName));
+            ClientPacketDistributor.sendToServer(new BackpackOpenPayload(slot, identifier, handlerName));
         } catch (Exception e) {
             YukamiBackpackTab.LOGGER.debug("Failed to open equipped backpack tab", e);
         }

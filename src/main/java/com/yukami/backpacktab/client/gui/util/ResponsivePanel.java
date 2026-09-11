@@ -8,8 +8,8 @@ public final class ResponsivePanel {
     private ResponsivePanel() {}
 
     public static Layout findLayout(AbstractContainerScreen<?> screen, int desiredWidth, int minimumWidth, int margin, IntUnaryOperator heightForWidth) {
-        return findLayout(screen.width, screen.height, screen.getGuiLeft(), screen.getGuiTop(),
-                screen.getYSize(), desiredWidth, minimumWidth, margin, heightForWidth);
+        return findLayout(screen.width, screen.height, screen.getLeftPos(), screen.getTopPos(),
+                screen.getImageHeight(), desiredWidth, minimumWidth, margin, heightForWidth);
     }
 
     static Layout findLayout(int screenWidth, int screenHeight, int guiLeft, int guiTop,

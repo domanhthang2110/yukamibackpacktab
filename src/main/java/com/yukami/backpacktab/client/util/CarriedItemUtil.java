@@ -3,7 +3,7 @@ package com.yukami.backpacktab.client.util;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -28,11 +28,11 @@ public final class CarriedItemUtil {
                 if (screenSlotIndex != -1) {
                     ItemStack carriedBeforeClick = containerMenu.getCarried().copy();
 
-                    gameMode.handleInventoryMouseClick(
+                    gameMode.handleContainerInput(
                             containerMenu.containerId,
                             screenSlotIndex,
                             0,
-                            ClickType.PICKUP,
+                            ContainerInput.PICKUP,
                             player
                     );
                     Slot destination = containerMenu.slots.get(screenSlotIndex);
@@ -55,11 +55,11 @@ public final class CarriedItemUtil {
                 Slot source = containerMenu.slots.get(screenSlotIndex);
 
                 if (containerMenu.getCarried().isEmpty() && ItemStack.matches(source.getItem(), stashedStack)) {
-                    gameMode.handleInventoryMouseClick(
+                    gameMode.handleContainerInput(
                             containerMenu.containerId,
                             screenSlotIndex,
                             0,
-                            ClickType.PICKUP,
+                            ContainerInput.PICKUP,
                             player
                     );
                 }
@@ -86,7 +86,7 @@ public final class CarriedItemUtil {
     }
 
     private static int findFreeSlot(LocalPlayer player, int excludedInventorySlot) {
-        int inventorySize = player.getInventory().items.size();
+        int inventorySize = player.getInventory().getNonEquipmentItems().size();
         for (int slot = 0; slot < inventorySize; slot++) {
             if (slot != excludedInventorySlot && player.getInventory().getItem(slot).isEmpty()) {
                 return slot;

@@ -1,28 +1,26 @@
-# eclipse
-bin
-*.launch
-.settings
-.metadata
-.classpath
-.project
+# Only source, build configuration, CI, and legal notices belong in Git.
+/*
+!/.gitignore
+!/.gitattributes
+!/src/
+!/gradle/
+!/gradlew
+!/gradlew.bat
+!/build.gradle
+!/settings.gradle
+!/gradle.properties
+!/.github/
+!/LICENSE.txt
+!/CREDITS.txt
 
-# idea
-out
-*.ipr
-*.iws
-*.iml
-.idea
-
-# gradle
-build
-.gradle
-
-# other
-*.log
-logs/
-eclipse
-run
-runs
-run-data
-
-repo
+# Generated files, logs, and local editor state within allowed directories.
+**/build/
+**/.gradle/
+**/out/
+**/bin/
+**/*.log
+**/*.class
+**/.DS_Store
+**/Thumbs.db
+**/.idea/
+**/.vscode/

@@ -95,11 +95,11 @@ public final class ContainerTab implements InventoryTab {
 
                 gameMode.useItemOn(localPlayer, InteractionHand.MAIN_HAND, hitResult);
             } else {
-                Minecraft.getInstance().setScreen(null);
+                Minecraft.getInstance().gui.setScreen(null);
             }
         } catch (Exception e) {
             YukamiBackpackTab.LOGGER.debug("Failed to open container tab at {}", containerPos, e);
-            Minecraft.getInstance().setScreen(null);
+            Minecraft.getInstance().gui.setScreen(null);
         }
     }
 
@@ -116,7 +116,7 @@ public final class ContainerTab implements InventoryTab {
         if (x == 0.0 && z == 0.0) {
             return player.getDirection().getOpposite();
         }
-        return Direction.getNearest(x, 0.0, z);
+        return Direction.getApproximateNearest(x, 0.0, z);
     }
 
     @Override
