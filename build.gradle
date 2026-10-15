@@ -19,8 +19,19 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
+
     maven {
-        url "https://cursemaven.com"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    maven {
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
     // Add here additional repositories if required by some of the dependencies below.
 }
@@ -128,8 +139,8 @@ dependencies {
     // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
     // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
     // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
-    implementation "curse.maven:sophisticated-backpacks-422301:8687841"
-    implementation "curse.maven:sophisticated-core-618298:8705083"
+    implementation "maven.modrinth:sophisticated-backpacks:${minecraft_version}-${sophisticated_backpacks_version}.${sophisticated_backpacks_build_number}"
+    implementation "maven.modrinth:sophisticated-core:${minecraft_version}-${sophisticated_core_version}.${sophisticated_core_build_number}"
     localRuntime "curse.maven:just-dire-things-1002348:7463040"
     localRuntime "curse.maven:configured-457570:7276577"
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
@@ -152,17 +163,19 @@ dependencies {
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
-            minecraft_version      : minecraft_version,
-            minecraft_version_range: minecraft_version_range,
-            neo_version            : neo_version,
-            neo_version_range      : neo_version_range,
-            loader_version_range   : loader_version_range,
-            mod_id                 : mod_id,
-            mod_name               : mod_name,
-            mod_license            : mod_license,
-            mod_version            : mod_version,
-            mod_authors            : mod_authors,
-            mod_description        : mod_description
+            minecraft_version                   : minecraft_version,
+            minecraft_version_range             : minecraft_version_range,
+            neo_version                         : neo_version,
+            neo_version_range                   : neo_version_range,
+            loader_version_range                : loader_version_range,
+            mod_id                              : mod_id,
+            mod_name                            : mod_name,
+            mod_license                         : mod_license,
+            mod_version                         : mod_version,
+            mod_authors                         : mod_authors,
+            mod_description                     : mod_description,
+            sophisticated_backpacks_version     : sophisticated_backpacks_version,
+            sophisticated_core_version          : sophisticated_core_version,
     ]
     inputs.properties replaceProperties
 

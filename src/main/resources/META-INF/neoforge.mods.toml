@@ -23,16 +23,34 @@ description='''${mod_description}'''
     ordering="NONE"
     side="BOTH"
 
+# The required versions
 [[dependencies.${mod_id}]]
     modId="sophisticatedbackpacks"
     type="required"
-    versionRange="[3.25.78,)"
+    versionRange="[${sophisticated_backpacks_version},)"
     ordering="AFTER"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="sophisticatedcore"
     type="required"
-    versionRange="[1.4.90,)"
+    versionRange="[${sophisticated_core_version},)"
+    ordering="AFTER"
+    side="BOTH"
+
+# Above the required version -> Maybe ok, maybe not, so "discouraged".
+[[dependencies.${mod_id}]]
+    modId="sophisticatedbackpacks"
+    type="discouraged"
+    versionRange="(${sophisticated_backpacks_version},)"
+    reason="This version is newer than the version tested with the current release. Compatibility has not been verified, and unexpected behavior is to be expected."
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="sophisticatedcore"
+    type="discouraged"
+    versionRange="(${sophisticated_core_version},)"
+    reason="This version is newer than the version tested with the current release. Compatibility has not been verified, and unexpected behavior is to be expected."
     ordering="AFTER"
     side="BOTH"
